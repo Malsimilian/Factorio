@@ -1,6 +1,14 @@
 import pygame
 
 
+class Object:
+    def __init__(self, image):
+        self.image = pygame.image.load(image).convert_alpha()
+
+
+class Player(Object):
+    def __init__(self):
+        super().__init__('Безымянный.png')
 
 
 
@@ -13,10 +21,10 @@ if __name__ == '__main__':
     running = True
     speed = side = 40
     FPS = 30
-    image = pygame.image.load('Безымянный.png').convert_alpha()
+    player = Player()
     clock = pygame.time.Clock()
     rect = pygame.Rect(0, 0, side, side)
-    screen.blit(image, rect)
+    screen.blit(player.image, rect)
     moving = False
     while running:
         for event in pygame.event.get():
@@ -33,7 +41,7 @@ if __name__ == '__main__':
                     rect.center = (rect.center[0], rect.center[1] + speed)
 
         screen.fill('black')
-        screen.blit(image, rect)
+        screen.blit(player.image, rect)
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
