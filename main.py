@@ -9,10 +9,9 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.runnig = True
 
     def new(self):
-        self.playing = True
+        self.runnig = True
         self.all = pygame.sprite.LayeredUpdates()
 
         Player(self, 10, 10)
@@ -31,11 +30,10 @@ class Game:
             self.screen.fill((0, 0, 0))
             self.event = event
             if self.event.type == pygame.QUIT:
-                self.playing = False
                 self.runnig = False
 
     def main(self): #игровой цикл
-        while self.playing:
+        while self.runnig:
             self.events()
             self.update()
             self.draw()
