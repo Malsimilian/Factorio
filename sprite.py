@@ -13,9 +13,9 @@ class Player(pygame.sprite.Sprite):
         self.image.fill((255, 0, 0))
 
 
-        image_to_load = pygame.image.load('img/Человек.png')
+        image_to_load = pygame.image.load('img/Безымянный.png')
         self.image = pygame.Surface([self.width, self.height])
-        # self.image.set_colorkey('black')
+        self.image.set_colorkey(BLACK)
         self.image.blit(image_to_load, (0, 0))
 
 
@@ -26,4 +26,13 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            self.rect.x += 10
+            self.rect.x += PLAYER_SPEED
+
+        if keys[pygame.K_a]:
+            self.rect.x -= PLAYER_SPEED
+
+        if keys[pygame.K_w]:
+            self.rect.y -= PLAYER_SPEED
+
+        if keys[pygame.K_s]:
+            self.rect.y += PLAYER_SPEED

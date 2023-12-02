@@ -20,6 +20,7 @@ class Game:
         self.all.update()
 
     def draw(self):
+        self.screen.fill(BLACK)
         self.all.draw(self.screen)
 
         self.clock.tick(FPS)
@@ -27,7 +28,6 @@ class Game:
 
     def events(self):
         for event in pygame.event.get():
-            self.screen.fill((0, 0, 0))
             self.event = event
             if self.event.type == pygame.QUIT:
                 self.runnig = False
@@ -35,8 +35,9 @@ class Game:
     def main(self): #игровой цикл
         while self.runnig:
             self.events()
-            self.update()
             self.draw()
+            self.update()
+
         self.runnig = False
 
 
