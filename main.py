@@ -13,11 +13,38 @@ class Game:
 
     def new(self):
         self.playing = True
+        self.all = pygame.sprite.LayeredUpdates()
+
+        Player(self, 10, 10)
+
+    def update(self):
+        self.all.update()
+
+    def draw(self):
+        self.all.draw(self.screen)
+
+        self.clock.tick(FPS)
+        pygame.display.update()
+
+    def events(self):
+        for event in pygame.event.get():
+            self.screen.fill((0, 0, 0))
+            self.event = event
+            if self.event.type == pygame.QUIT:
+                self.playing = False
+                self.runnig = False
+
+    def main(self): #игровой цикл
+        while self.playing:
+            self.events()
+            self.update()
+            self.draw()
+        self.runnig = False
 
 
 g = Game()
 g.new()
 while g.runnig:
-    pass
+    g.main()
 pygame.quit()
 sys.exit()
