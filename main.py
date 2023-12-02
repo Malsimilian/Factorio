@@ -11,6 +11,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.runnig = True
+
         self.all = pygame.sprite.LayeredUpdates()
 
         Player(self, 10, 10)
@@ -39,8 +40,12 @@ class Game:
 
         self.runnig = False
 
+    def intro_screen(self):
+        Button(self, 500, 500)
+        Mouse(self)
 
 g = Game()
+g.intro_screen()
 while g.runnig:
     g.main()
 pygame.quit()

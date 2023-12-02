@@ -5,5 +5,6 @@ SIDE = 40
 FPS = 60
 
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 
 PLAYER_SPEED = 5
