@@ -8,11 +8,17 @@ class Object:
 
 class Player(Object):
     def __init__(self):
-        super().__init__('Игрок.png')
+        super().__init__('Человек.png')
 
 class Floor(Object):
     def __init__(self):
         super().__init__('Земля.png')
+
+
+class Conveer(Object):
+    def __init__(self):
+        super().__init__('Конвеер верх.png')
+
 
 
 def draw_floor(screen):
@@ -30,6 +36,8 @@ if __name__ == '__main__':
     size = width, height = 1000, 1000
     screen = pygame.display.set_mode(size)
 
+
+
     draw_floor(screen)
     running = True
     side = 40
@@ -38,6 +46,10 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     rect = pygame.Rect(0, 0, side, side)
     screen.blit(player.image, rect)
+    big_side = int(screen.get_size()[0] / side)
+    print(big_side)
+    field = [[Floor] * big_side for i in range(big_side)]
+    print(field)
     moving = False
     need_draw = False
     while running:
