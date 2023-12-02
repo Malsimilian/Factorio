@@ -1,4 +1,5 @@
 import pygame
+from config import *
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -7,15 +8,16 @@ class Player(pygame.sprite.Sprite):
         self.groups = self.game.all
         pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.image = pygame.Surface([10, 10])
+        self.width = self.height = SIDE
+        self.image = pygame.Surface([SIDE, SIDE])
         self.image.fill((255, 0, 0))
 
-        """
-        image_to_load = pg.image.load('img/Размытыш 2.0.jpg')
-        self.image = pg.Surface([self.width, self.hieght])
-        self.image.set_colorkey(BLACK)
+
+        image_to_load = pygame.image.load('img/Человек.png')
+        self.image = pygame.Surface([self.width, self.height])
+        # self.image.set_colorkey('black')
         self.image.blit(image_to_load, (0, 0))
-        """
+
 
         self.rect = self.image.get_rect()
         self.rect.x = x
