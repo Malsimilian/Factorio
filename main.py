@@ -41,7 +41,6 @@ class Game:
 
 
 g = Game()
-g.new()
 while g.runnig:
     g.main()
 pygame.quit()
