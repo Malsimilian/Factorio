@@ -10,7 +10,6 @@ class Game:
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
         self.clock = pygame.time.Clock()
 
-    def new(self):
         self.runnig = True
         self.all = pygame.sprite.LayeredUpdates()
 
