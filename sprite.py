@@ -2,7 +2,7 @@ import pygame
 from config import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game):
         self.game = game
         self._layer = 4
         self.groups = self.game.all
@@ -17,25 +17,29 @@ class Player(pygame.sprite.Sprite):
         self.image.blit(image_to_load, (0, 0))
 
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
 
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            self.rect.x += PLAYER_SPEED
+            for sprite in self.game.dynamic:
+                sprite.rect.x -= PLAYER_SPEED
 
         if keys[pygame.K_a]:
-            self.rect.x -= PLAYER_SPEED
+            for sprite in self.game.dynamic:
+                sprite.rect.x += PLAYER_SPEED
 
         if keys[pygame.K_w]:
-            self.rect.y -= PLAYER_SPEED
+            for sprite in self.game.dynamic:
+                sprite.rect.y += PLAYER_SPEED
 
         if keys[pygame.K_s]:
-            self.rect.y += PLAYER_SPEED
+            for sprite in self.game.dynamic:
+                sprite.rect.y -= PLAYER_SPEED
+
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, event):
         self.game = game
         self._layer = 4
         self.groups = self.game.all
@@ -50,11 +54,20 @@ class Button(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+        self.event = event
+
+    def update(self):
+        hits = pygame.sprite.spritecollide(self, self.game.mouse, False)
+        if hits:
+            if self.game.click:
+                self.event()
+
+
 class Mouse(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 4
-        self.groups = self.game.all
+        self.groups = self.game.all, self.game.mouse
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.width = self.height = 8
@@ -67,3 +80,19 @@ class Mouse(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
+
+
+class Ground(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = 1
+        self.groups = self.game.all, self.game.dynamic
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = self.height = 96
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(GREEN)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y

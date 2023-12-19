@@ -11,10 +11,12 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.runnig = True
+        self.click = False  # нажаата ли ЛКМ
 
-        self.all = pygame.sprite.LayeredUpdates()
-
-        Player(self, 10, 10)
+        self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
+        self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
+        self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
+        self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
 
     def update(self):
         self.all.update()
@@ -27,10 +29,14 @@ class Game:
         pygame.display.update()
 
     def events(self):
+        self.click = False
         for event in pygame.event.get():
             self.event = event
             if self.event.type == pygame.QUIT:
                 self.runnig = False
+
+            if self.event.type == pygame.MOUSEBUTTONDOWN:
+                self.click = True
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -41,11 +47,28 @@ class Game:
         self.runnig = False
 
     def intro_screen(self):
-        Button(self, 500, 500)
+        Button(self, 500, 500, self.create_map)
         Mouse(self)
+
+    def create_map(self):
+        for sprite in self.all:
+            sprite.kill()
+        Player(self)
+        with open('map.txt', 'r', encoding="utf-8") as map:
+            map = map.read().split("\n")
+
+            for elem in range(len(map)):
+                map[elem] = list(map[elem])
+
+            for i, row in enumerate(map):
+                for j, columb in enumerate(row):
+                    if columb == "B":
+                        Ground(self, j, i)
+
 
 g = Game()
 g.intro_screen()
+#g.create_map()
 while g.runnig:
     g.main()
 pygame.quit()
