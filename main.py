@@ -17,6 +17,7 @@ class Game:
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
         self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
+        self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем (конвейер, конструктор и т.п)
 
     def update(self):
         self.all.update()
@@ -54,6 +55,14 @@ class Game:
         for sprite in self.all:
             sprite.kill()
         Player(self)
+
+        Conveyor(self, 2, 5, "вправо", [1, None, None, None])
+        Conveyor(self, 3, 5, "вправо")
+        Conveyor(self, 4, 5, "вправо")
+        Conveyor(self, 5, 5, "вправо")
+        Conveyor(self, 6, 5, "вправо")
+        Conveyor(self, 7, 5, "вправо")
+        Conveyor(self, 8, 5, "вправо")
         with open('map.txt', 'r', encoding="utf-8") as map:
             map = map.read().split("\n")
 
