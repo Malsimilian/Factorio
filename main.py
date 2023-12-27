@@ -59,7 +59,7 @@ class Game:
         Conveyor(self, 2, 5, "вправо", [1, None, None, None])
         Conveyor(self, 3, 5, "вправо")
         Conveyor(self, 4, 5, "вправо")
-        Conveyor(self, 5, 5, "вправо")
+        Conveyor(self, 5, 5, "вправо", [1, None, None, None])
         Conveyor(self, 6, 5, "вправо")
         Conveyor(self, 7, 5, "вправо")
         Conveyor(self, 8, 5, "вправо")

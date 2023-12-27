@@ -157,8 +157,8 @@ class Conveyor(pygame.sprite.Sprite):
         self.rect.x = x * SIDE
         self.rect.y = y * SIDE
 
-        self.storage = st  # хранилище в данный момент
-        self.next_storage = [None, None, None, None]  # хранилище в следующий момент (костыль для правильной работы спрайта)
+        self.next_storage =self.storage = st  # хранилище в данный момент
+        # [None, None, None, None]  # хранилище в следующий момент (костыль для правильной работы спрайта)
         self.last = 0
 
     def update(self):
@@ -168,11 +168,42 @@ class Conveyor(pygame.sprite.Sprite):
                 for sprite in self.game.storage:
                     if self.facing == "вправо":
                         if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y:
-                            sprite.next_storage = self.storage
-                            self.storage = self.next_storage = [None, None, None, None]
+                            if sprite.storage == [None, None, None, None]:
+                                sprite.next_storage = self.storage
+                                self.storage = self.next_storage = [None, None, None, None]
+                            else:
+                                items_sprite = 0
+                                for item in sprite.storage:
+                                    if item:
+                                        items_sprite += 1
+
+                                items_self = 0
+                                for item in self.storage:
+                                    if item:
+                                        items_self += 1
+
+                                if items_self + items_sprite == 4:
+                                    sprite.next_storage = [1, 1, 1, 1]
+                                    self.storage = self.next_storage = [None, None, None, None]
+
+                                elif items_self + items_sprite < 4:
+                                    for el in range(items_self + items_sprite):
+                                        sprite.next_storage[el] = 1
+                                    self.storage = self.next_storage = [None, None, None, None]
+
+                                elif items_self + items_sprite == 8:
+                                    pass
+
+                                else:
+                                    sprite.next_storage = [1, 1, 1, 1]
+                                    self.next_storage = self.storage = [None, None, None, None]
+                                    for el in range(items_self + items_sprite - 4):
+                                        self.next_storage[el] = 1
                             break
+
             #print(self.storage)
             self.storage = self.next_storage
+
             if self.storage[3] != None:
                 self.image.blit(pygame.image.load("img/Конвейер_вправо_4.png"), (0, 0))
             elif self.storage[2] != None:
