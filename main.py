@@ -56,13 +56,15 @@ class Game:
             sprite.kill()
         Player(self)
 
-        Conveyor(self, 2, 5, "вправо", [1, None, None, None])
-        Conveyor(self, 3, 5, "вправо")
-        Conveyor(self, 4, 5, "вправо")
-        Conveyor(self, 5, 5, "вправо", [1, None, None, None])
-        Conveyor(self, 6, 5, "вправо")
-        Conveyor(self, 7, 5, "вправо")
-        Conveyor(self, 8, 5, "вправо")
+        Conveyor(self, 2, 5, "вправо")
+        Conveyor(self, 3, 5, "вправо", [1, None, None, None])
+        Conveyor(self, 4, 5, "вверх")
+        Conveyor(self, 4, 4, "вверх")
+        Conveyor(self, 4, 3, "влево")
+        Conveyor(self, 3, 3, "влево")
+        Conveyor(self, 2, 3, "вниз")
+        Conveyor(self, 2, 4, "вниз")
+
         with open('map.txt', 'r', encoding="utf-8") as map:
             map = map.read().split("\n")
 
