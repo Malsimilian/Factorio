@@ -26,20 +26,16 @@ class Player(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.last >= 75:
             self.last = pygame.time.get_ticks()
             if keys[pygame.K_d]:
-                for sprite in self.game.dynamic:
-                    sprite.rect.x -= PLAYER_SPEED
+                self.rect.x += PLAYER_SPEED
 
             if keys[pygame.K_a]:
-                for sprite in self.game.dynamic:
-                    sprite.rect.x += PLAYER_SPEED
+                self.rect.x -= PLAYER_SPEED
 
             if keys[pygame.K_w]:
-                for sprite in self.game.dynamic:
-                    sprite.rect.y += PLAYER_SPEED
+                self.rect.y -= PLAYER_SPEED
 
             if keys[pygame.K_s]:
-                for sprite in self.game.dynamic:
-                    sprite.rect.y -= PLAYER_SPEED
+                self.rect.y += PLAYER_SPEED
 
 
 class Button(pygame.sprite.Sprite):
