@@ -93,13 +93,28 @@ class Ground(pygame.sprite.Sprite):
         self.groups = self.game.all, self.game.dynamic
         pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.width = self.height = 96
-        self.image = pygame.Surface([SIDE, SIDE])
-        self.image.fill(GREEN)
+        self.image = pygame.Surface([1024, 1024])
+        self.image.blit(pygame.image.load("img/Гига_Земля.png"), (0, 0))
 
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = x * 1024
+        self.rect.y = y * 1024
+
+
+class Ore(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all, self.game.dynamic
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([40, 40])
+        self.image.blit(pygame.image.load("img/Руда_1.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * 40
+        self.rect.y = y * 40
 
 
 class Item(pygame.sprite.Sprite):

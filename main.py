@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 from sprite import *
 from config import *
 
@@ -56,28 +57,19 @@ class Game:
     def create_map(self):
         for sprite in self.all:
             sprite.kill()
+
+        for i in range(5):
+            for j in range(5):
+                Ground(self, j, i)
+
+        for kol in range(16):
+            Ore(self, random.randint(0, 127), random.randint(0, 127))
+
+        for sprite in self.all:
+            sprite.rect.x -= 2560
+            sprite.rect.y -= 2560
+
         Player(self)
-
-        Conveyor(self, 3, 5, "вправо", 1)
-        Conveyor(self, 4, 5, "вправо")
-        Conveyor(self, 5, 5, "вверх")
-        Conveyor(self, 5, 4, "вверх")
-        Conveyor(self, 5, 3, "влево")
-        Conveyor(self, 4, 3, "влево")
-        Conveyor(self, 3, 3, "вниз")
-        Conveyor(self, 3, 4, "вниз")
-
-        with open('map.txt', 'r', encoding="utf-8") as map:
-            map = map.read().split("\n")
-
-            for elem in range(len(map)):
-                map[elem] = list(map[elem])
-
-            for i, row in enumerate(map):
-                for j, columb in enumerate(row):
-                    if columb == "B":
-                        Ground(self, j, i)
-
 
 g = Game()
 g.intro_screen()
