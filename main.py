@@ -65,16 +65,16 @@ class Game:
         Conveyor(self, 2, 3, "вниз")
         Conveyor(self, 2, 4, "вниз")
 
-        with open('map.txt', 'r', encoding="utf-8") as map:
-            map = map.read().split("\n")
-
-            for elem in range(len(map)):
-                map[elem] = list(map[elem])
-
-            for i, row in enumerate(map):
-                for j, columb in enumerate(row):
-                    if columb == "B":
-                        Ground(self, j, i)
+        # with open('map.txt', 'r', encoding="utf-8") as map:
+        #     map = map.read().split("\n")
+        #
+        #     for elem in range(len(map)):
+        #         map[elem] = list(map[elem])
+        #
+        #     # for i, row in enumerate(map):
+        #     #     for j, columb in enumerate(row):
+        #     #         if columb == "B":
+        #     #             Ground(self, j, i)
 
 
 g = Game()
