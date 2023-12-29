@@ -21,6 +21,8 @@ class Game:
 
     def update(self):
         self.all.update()
+        for sprite in self.storage:
+            sprite.next()
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -56,14 +58,14 @@ class Game:
             sprite.kill()
         Player(self)
 
-        Conveyor(self, 2, 5, "вправо")
-        Conveyor(self, 3, 5, "вправо", [1, None, None, None])
-        Conveyor(self, 4, 5, "вверх")
-        Conveyor(self, 4, 4, "вверх")
+        Conveyor(self, 3, 5, "вправо", 1)
+        Conveyor(self, 4, 5, "вправо")
+        Conveyor(self, 5, 5, "вверх")
+        Conveyor(self, 5, 4, "вверх")
+        Conveyor(self, 5, 3, "влево")
         Conveyor(self, 4, 3, "влево")
-        Conveyor(self, 3, 3, "влево")
-        Conveyor(self, 2, 3, "вниз")
-        Conveyor(self, 2, 4, "вниз")
+        Conveyor(self, 3, 3, "вниз")
+        Conveyor(self, 3, 4, "вниз")
 
         with open('map.txt', 'r', encoding="utf-8") as map:
             map = map.read().split("\n")
