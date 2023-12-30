@@ -2,7 +2,7 @@ import pygame, random
 from config import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game):
+    def __init__(self, game, rect):
         self.game = game
         self._layer = 4
         self.groups = self.game.all
@@ -16,8 +16,8 @@ class Player(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.image.blit(image_to_load, (0, 0))
 
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIN_WIDTH // 2 + 40 * random.randint(-5, +5), WIN_HEIGHT // 2 + 40 * random.randint(-5, +5))
+        self.rect = rect
+
 
         self.last = 0
 

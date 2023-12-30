@@ -9,7 +9,7 @@ class Cell:
         self.board_x = board_x
         self.board_y = board_y
         self.rect = rect
-        self.objects = [Player(game)]
+        self.objects = []
 
 
     def __str__(self):
@@ -43,7 +43,7 @@ class Game:
         self.board = [['-'] * nofcells for _ in range(nofcells)]
         for i in range(nofcells):
             for j in range(nofcells):
-                rect = (j * SIDE, i * SIDE, SIDE, SIDE)
+                rect = pygame.Rect(j * SIDE, i * SIDE, SIDE, SIDE)
                 self.board[i][j] = Cell(j, i, rect, self)
         self.add_sprite_from_new_cells()
 
@@ -63,6 +63,16 @@ class Game:
         self.clock.tick(FPS)
         pygame.display.update()
 
+    def find_cell(self, x, y):
+        for cells in self.board:
+            for cell in cells:
+                if cell.board_x == x and cell.board_y == y:
+                    return cell
+
+    def create_sprite(self, x, y, object):
+        cell = self.find_cell(x, y)
+        cell.objects.append(object(self, cell.rect))
+
     def events(self):
         self.click = False
         for event in pygame.event.get():
@@ -73,11 +83,14 @@ class Game:
             if self.event.type == pygame.MOUSEBUTTONDOWN:
                 self.click = True
             if self.event.type == pygame.KEYDOWN:
-                if self.event.key == pygame.K_DELETE:
-                    for cells in self.board:
-                        for cell in cells:
-                            cell.delete_objects()
+                self.delete_all()
 
+    def delete_all(self):
+        if self.event.key == pygame.K_DELETE:
+            for cells in self.board:
+                for cell in cells:
+                    cell.delete_objects()
+            print('произведено удаление всех обЪектов')
 
 
     def main(self): #игровой цикл
@@ -95,15 +108,14 @@ class Game:
     def create_map(self):
         for sprite in self.all:
             sprite.kill()
-        Player(self)
+
+        self.create_board()
+
+        self.create_sprite(5, 5, Player)
 
         Conveyor(self, 3, 5, "вправо", 1)
-        Conveyor(self, 4, 5, "вправо")
-        Conveyor(self, 5, 5, "вверх")
-        Conveyor(self, 5, 4, "вверх")
-        Conveyor(self, 5, 3, "влево")
-        Conveyor(self, 4, 3, "влево")
-        Conveyor(self, 3, 3, "вниз")
+        Conveyor(self, 4, 5, "вверх")
+        Conveyor(self, 4, 4, "влево")
         Conveyor(self, 3, 4, "вниз")
 
         # with open('map.txt', 'r', encoding="utf-8") as map:
