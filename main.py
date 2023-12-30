@@ -3,6 +3,23 @@ import sys
 from sprite import *
 from config import *
 
+
+class Cell:
+    def __init__(self, board_x, board_y, rect, game):
+        self.board_x = board_x
+        self.board_y = board_y
+        self.rect = rect
+        self.objects = [Player(game)]
+
+
+    def __str__(self):
+        return f'{self.board_x, self.board_y, self.rect, self.objects}'
+
+    def delete_objects(self):
+        for object in self.objects:
+            object.kill()
+
+
 class Game:
     def __init__(self):
         #иниацилизация
@@ -18,6 +35,23 @@ class Game:
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
         self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
         self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем (конвейер, конструктор и т.п)
+
+
+
+    def create_board(self):
+        nofcells = int(WIN_WIDTH / SIDE)
+        self.board = [['-'] * nofcells for _ in range(nofcells)]
+        for i in range(nofcells):
+            for j in range(nofcells):
+                rect = (j * SIDE, i * SIDE, SIDE, SIDE)
+                self.board[i][j] = Cell(j, i, rect, self)
+        self.add_sprite_from_new_cells()
+
+    def add_sprite_from_new_cells(self):
+        for cells in self.board:
+            for cell in cells:
+                for object in cell.objects:
+                    object.groups = self.all
 
     def update(self):
         self.all.update()
@@ -38,6 +72,13 @@ class Game:
 
             if self.event.type == pygame.MOUSEBUTTONDOWN:
                 self.click = True
+            if self.event.type == pygame.KEYDOWN:
+                if self.event.key == pygame.K_DELETE:
+                    for cells in self.board:
+                        for cell in cells:
+                            cell.delete_objects()
+
+
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -55,6 +96,8 @@ class Game:
         for sprite in self.all:
             sprite.kill()
         Player(self)
+
+        self.create_board()
 
         Conveyor(self, 2, 5, "вправо")
         Conveyor(self, 3, 5, "вправо", [1, None, None, None])
