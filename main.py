@@ -13,6 +13,7 @@ class Game:
 
         self.runnig = True
         self.click = False  # нажаата ли ЛКМ
+        self.facing = "вниз"  # направление модулей
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
@@ -58,6 +59,7 @@ class Game:
         for sprite in self.all:
             sprite.kill()
 
+        Mouse(self)
         for i in range(5):
             for j in range(5):
                 Ground(self, j, i)
@@ -68,6 +70,8 @@ class Game:
         for sprite in self.all:
             sprite.rect.x -= 2560
             sprite.rect.y -= 2560
+
+        Facing(self)
 
         Player(self)
 

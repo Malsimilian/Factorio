@@ -84,6 +84,8 @@ class Mouse(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
+        if self.game.click:
+            Conveyor(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
 
 
 class Ground(pygame.sprite.Sprite):
@@ -95,6 +97,7 @@ class Ground(pygame.sprite.Sprite):
 
         self.image = pygame.Surface([1024, 1024])
         self.image.blit(pygame.image.load("img/Гига_Земля.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
         self.rect.x = x * 1024
@@ -163,7 +166,7 @@ class Mine(pygame.sprite.Sprite):
 class Conveyor(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, st=None):
         self.game = game
-        self._layer = 1
+        self._layer = 2
         self.groups = self.game.all, self.game.dynamic, self.game.storage
         pygame.sprite.Sprite.__init__(self, self.groups)
 
@@ -267,3 +270,34 @@ class Conveyor(pygame.sprite.Sprite):
             else:
                 self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
+
+class Facing(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 3
+        self.groups = self.game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([SIDE * 2, SIDE * 2])
+        self.image.blit(pygame.image.load("img/Направление_вниз.png"), (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = WIN_WIDTH - 80
+        self.rect.y = 0
+
+        self.ind = 0
+        self.facings = ["вниз", "вправо", "вверх", "влево"]
+
+        self.last = 500
+
+    def update(self):
+        if pygame.time.get_ticks() - self.last >= 500:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_r]:
+                self.last = pygame.time.get_ticks()
+                self.ind += 1
+                if self.ind == 4:
+                    self.ind = 0
+
+                self.game.facing = self.facings[self.ind]
+                self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
