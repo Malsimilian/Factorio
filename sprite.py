@@ -108,7 +108,7 @@ class Ore(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
         self._layer = 2
-        self.groups = self.game.all, self.game.dynamic
+        self.groups = self.game.all, self.game.dynamic, self.game.ores
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([40, 40])
@@ -121,7 +121,7 @@ class Ore(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, type):
+    def __init__(self, game):
         self.game = game
         self._layer = 1
         self.groups = self.game.all, self.game.dynamic
@@ -131,14 +131,14 @@ class Item(pygame.sprite.Sprite):
         self.image.fill(RED)
 
         self.rect = self.image.get_rect()
-        self.rect.x = x * 24
-        self.rect.y = y * 24
+        self.rect.x = 0
+        self.rect.y = 0
 
-        self.type = type
+        self.type = 0
 
 
 class Mine(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, type):
+    def __init__(self, game, x, y, facing):
         self.game = game
         self._layer = 1
         self.groups = self.game.all, self.game.dynamic
@@ -151,16 +151,25 @@ class Mine(pygame.sprite.Sprite):
         self.rect.x = x * SIDE
         self.rect.y = y * SIDE
 
-        self.type = type
         self.last = 0  # последнее время get_ore в мл сек
+        self.facing = facing
 
     def update(self):
-        self.get_ore()
+        hits = pygame.sprite.spritecollide(self, self.game.ores, False)
+        if hits:
+            self.get_ore()
 
     def get_ore(self):
-        if pygame.time.get_ticks() - self.last >= 2000:
-            print(self.type)
+        if pygame.time.get_ticks() - self.last >= 4000:
             self.last = pygame.time.get_ticks()
+            if self.facing == "вправо":
+                for sprite in self.game.storage:
+                    if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y:
+                        self.sprite = sprite
+                        if not sprite.next_storage:
+                            if not sprite.storage:
+                                sprite.next_storage = 1
+                        break
 
 
 class Conveyor(pygame.sprite.Sprite):
@@ -182,10 +191,10 @@ class Conveyor(pygame.sprite.Sprite):
         self.next_storage = None
         self.peredacha = False
         self.storage = st  # хранилище в данный момент
-        self.last = 1000
+        self.last = 2000
 
     def update(self):
-        if pygame.time.get_ticks() - self.last >= 500:
+        if pygame.time.get_ticks() - self.last >= 1000:
             self.last = pygame.time.get_ticks()
             self.peredacha = False
             self.sprite = None

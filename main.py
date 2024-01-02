@@ -20,7 +20,8 @@ class Game:
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
         self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
-        self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем (конвейер, конструктор и т.п)
+        self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем
+        self.ores = pygame.sprite.LayeredUpdates()
 
     def update(self):
         self.all.update()
@@ -75,6 +76,9 @@ class Game:
         self.playing = True
         Facing(self)
         Player(self)
+        #Conveyor(self, 0, 0, "вправо", Item(self))
+        Ore(self, 0, 0)
+        Mine(self, 0, 0, "вправо")
 
 g = Game()
 #g.intro_screen()
