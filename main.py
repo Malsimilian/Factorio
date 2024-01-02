@@ -12,6 +12,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.runnig = True
+        self.playing = False  # момент начала игры
         self.click = False  # нажаата ли ЛКМ
         self.facing = "вниз"  # направление модулей
 
@@ -71,13 +72,13 @@ class Game:
             sprite.rect.x -= 2560
             sprite.rect.y -= 2560
 
+        self.playing = True
         Facing(self)
-
         Player(self)
 
 g = Game()
-g.intro_screen()
-#g.create_map()
+#g.intro_screen()
+g.create_map()
 while g.runnig:
     g.main()
 pygame.quit()
