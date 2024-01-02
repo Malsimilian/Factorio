@@ -80,8 +80,8 @@ class Mouse(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
-        if self.game.click:
-            Conveyor(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+        if self.game.right_click:
+            self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
 
 
 class Ground(pygame.sprite.Sprite):
@@ -296,7 +296,7 @@ class Facing(pygame.sprite.Sprite):
         self.last = 500
 
     def update(self):
-        if pygame.time.get_ticks() - self.last >= 500:
+        if pygame.time.get_ticks() - self.last >= 200:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_r]:
                 self.last = pygame.time.get_ticks()
