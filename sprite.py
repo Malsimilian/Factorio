@@ -86,9 +86,11 @@ class Mouse(pygame.sprite.Sprite):
         if self.game.left_click:
             for object in self.game.all:
                 if isinstance(object, Mouse) or isinstance(object, Ore):
-                    return
-                if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                    pass
+                elif object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                        print(object, 'УБИТ МНОЙ')
                         object.kill()
+
 
 
 class Ground(pygame.sprite.Sprite):
