@@ -85,8 +85,9 @@ class Mouse(pygame.sprite.Sprite):
             self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
         if self.game.left_click:
             for object in self.game.all:
-                if isinstance(object, Conveyor):
-                    if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                if isinstance(object, Mouse) or isinstance(object, Ore):
+                    return
+                if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
                         object.kill()
 
 
