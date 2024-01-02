@@ -83,6 +83,11 @@ class Mouse(pygame.sprite.Sprite):
         self.rect.center = pygame.mouse.get_pos()
         if self.game.right_click:
             self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+        if self.game.left_click:
+            for object in self.game.all:
+                if isinstance(object, Conveyor):
+                    if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                        object.kill()
 
 
 class Ground(pygame.sprite.Sprite):
