@@ -1,24 +1,8 @@
 import pygame
 import sys
+import random
 from sprite import *
 from config import *
-
-
-class Cell:
-    def __init__(self, board_x, board_y, rect, game):
-        self.board_x = board_x
-        self.board_y = board_y
-        self.rect = rect
-        self.objects = [Player(game)]
-
-
-    def __str__(self):
-        return f'{self.board_x, self.board_y, self.rect, self.objects}'
-
-    def delete_objects(self):
-        for object in self.objects:
-            object.kill()
-
 
 class Game:
     def __init__(self):
@@ -28,33 +12,21 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.runnig = True
+        self.playing = False  # момент начала игры
         self.click = False  # нажаата ли ЛКМ
+        self.facing = "вниз"  # направление модулей
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
         self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
-        self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем (конвейер, конструктор и т.п)
-
-
-
-    def create_board(self):
-        nofcells = int(WIN_WIDTH / SIDE)
-        self.board = [['-'] * nofcells for _ in range(nofcells)]
-        for i in range(nofcells):
-            for j in range(nofcells):
-                rect = (j * SIDE, i * SIDE, SIDE, SIDE)
-                self.board[i][j] = Cell(j, i, rect, self)
-        self.add_sprite_from_new_cells()
-
-    def add_sprite_from_new_cells(self):
-        for cells in self.board:
-            for cell in cells:
-                for object in cell.objects:
-                    object.groups = self.all
+        self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем
+        self.ores = pygame.sprite.LayeredUpdates()
 
     def update(self):
         self.all.update()
+        for sprite in self.storage:
+            sprite.next()
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -72,13 +44,6 @@ class Game:
 
             if self.event.type == pygame.MOUSEBUTTONDOWN:
                 self.click = True
-            if self.event.type == pygame.KEYDOWN:
-                if self.event.key == pygame.K_DELETE:
-                    for cells in self.board:
-                        for cell in cells:
-                            cell.delete_objects()
-
-
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -95,32 +60,29 @@ class Game:
     def create_map(self):
         for sprite in self.all:
             sprite.kill()
+
+        Mouse(self)
+        for i in range(5):
+            for j in range(5):
+                Ground(self, j, i)
+
+        for kol in range(16):
+            Ore(self, random.randint(0, 127), random.randint(0, 127))
+
+        for sprite in self.all:
+            sprite.rect.x -= 2560
+            sprite.rect.y -= 2560
+
+        self.playing = True
+        Facing(self)
         Player(self)
-
-        Conveyor(self, 3, 5, "вправо", 1)
-        Conveyor(self, 4, 5, "вправо")
-        Conveyor(self, 5, 5, "вверх")
-        Conveyor(self, 5, 4, "вверх")
-        Conveyor(self, 5, 3, "влево")
-        Conveyor(self, 4, 3, "влево")
-        Conveyor(self, 3, 3, "вниз")
-        Conveyor(self, 3, 4, "вниз")
-
-        # with open('map.txt', 'r', encoding="utf-8") as map:
-        #     map = map.read().split("\n")
-        #
-        #     for elem in range(len(map)):
-        #         map[elem] = list(map[elem])
-        #
-        #     # for i, row in enumerate(map):
-        #     #     for j, columb in enumerate(row):
-        #     #         if columb == "B":
-        #     #             Ground(self, j, i)
-
+        #Conveyor(self, 0, 0, "вправо", Item(self))
+        Ore(self, 0, 0)
+        Mine(self, 0, 0, "вправо")
 
 g = Game()
-g.intro_screen()
-#g.create_map()
+#g.intro_screen()
+g.create_map()
 while g.runnig:
     g.main()
 pygame.quit()

@@ -80,6 +80,8 @@ class Mouse(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
+        if self.game.click:
+            Conveyor(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
 
 
 class Ground(pygame.sprite.Sprite):
@@ -89,17 +91,33 @@ class Ground(pygame.sprite.Sprite):
         self.groups = self.game.all, self.game.dynamic
         pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.width = self.height = 96
-        self.image = pygame.Surface([SIDE, SIDE])
-        self.image.fill(GREEN)
+        self.image = pygame.Surface([1024, 1024])
+        self.image.blit(pygame.image.load("img/Гига_Земля.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = x * 1024
+        self.rect.y = y * 1024
+
+
+class Ore(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all, self.game.dynamic, self.game.ores
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([40, 40])
+        self.image.blit(pygame.image.load("img/Руда_1.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * 40
+        self.rect.y = y * 40
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, type):
+    def __init__(self, game):
         self.game = game
         self._layer = 1
         self.groups = self.game.all, self.game.dynamic
@@ -109,14 +127,14 @@ class Item(pygame.sprite.Sprite):
         self.image.fill(RED)
 
         self.rect = self.image.get_rect()
-        self.rect.x = x * 24
-        self.rect.y = y * 24
+        self.rect.x = 0
+        self.rect.y = 0
 
-        self.type = type
+        self.type = 0
 
 
 class Mine(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, type):
+    def __init__(self, game, x, y, facing):
         self.game = game
         self._layer = 1
         self.groups = self.game.all, self.game.dynamic
@@ -129,22 +147,31 @@ class Mine(pygame.sprite.Sprite):
         self.rect.x = x * SIDE
         self.rect.y = y * SIDE
 
-        self.type = type
         self.last = 0  # последнее время get_ore в мл сек
+        self.facing = facing
 
     def update(self):
-        self.get_ore()
+        hits = pygame.sprite.spritecollide(self, self.game.ores, False)
+        if hits:
+            self.get_ore()
 
     def get_ore(self):
-        if pygame.time.get_ticks() - self.last >= 2000:
-            print(self.type)
+        if pygame.time.get_ticks() - self.last >= 4000:
             self.last = pygame.time.get_ticks()
+            if self.facing == "вправо":
+                for sprite in self.game.storage:
+                    if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y:
+                        self.sprite = sprite
+                        if not sprite.next_storage:
+                            if not sprite.storage:
+                                sprite.next_storage = 1
+                        break
 
 
 class Conveyor(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, st=None):
         self.game = game
-        self._layer = 1
+        self._layer = 2
         self.groups = self.game.all, self.game.dynamic, self.game.storage
         pygame.sprite.Sprite.__init__(self, self.groups)
 
@@ -160,10 +187,10 @@ class Conveyor(pygame.sprite.Sprite):
         self.next_storage = None
         self.peredacha = False
         self.storage = st  # хранилище в данный момент
-        self.last = 1000
+        self.last = 2000
 
     def update(self):
-        if pygame.time.get_ticks() - self.last >= 500:
+        if pygame.time.get_ticks() - self.last >= 1000:
             self.last = pygame.time.get_ticks()
             self.peredacha = False
             self.sprite = None
@@ -248,3 +275,34 @@ class Conveyor(pygame.sprite.Sprite):
             else:
                 self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
+
+class Facing(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 3
+        self.groups = self.game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([SIDE * 2, SIDE * 2])
+        self.image.blit(pygame.image.load("img/Направление_вниз.png"), (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = WIN_WIDTH - 80
+        self.rect.y = 0
+
+        self.ind = 0
+        self.facings = ["вниз", "вправо", "вверх", "влево"]
+
+        self.last = 500
+
+    def update(self):
+        if pygame.time.get_ticks() - self.last >= 500:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_r]:
+                self.last = pygame.time.get_ticks()
+                self.ind += 1
+                if self.ind == 4:
+                    self.ind = 0
+
+                self.game.facing = self.facings[self.ind]
+                self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
