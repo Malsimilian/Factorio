@@ -17,25 +17,26 @@ class Player(pygame.sprite.Sprite):
         self.image.blit(image_to_load, (0, 0))
 
         self.rect = self.image.get_rect()
-        self.rect.center = (WIN_WIDTH // 2 + 40 * random.randint(-5, +5), WIN_HEIGHT // 2 + 40 * random.randint(-5, +5))
-
+        self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
+        #  * random.randint(-5, +5)  * random.randint(-5, +5)
         self.last = 0
 
     def update(self):
         keys = pygame.key.get_pressed()
         if pygame.time.get_ticks() - self.last >= 75:
             self.last = pygame.time.get_ticks()
-            if keys[pygame.K_d]:
-                self.rect.x += PLAYER_SPEED
+            for sprite in self.game.dynamic:
+                if keys[pygame.K_d]:
+                    sprite.rect.x -= PLAYER_SPEED
 
-            if keys[pygame.K_a]:
-                self.rect.x -= PLAYER_SPEED
+                if keys[pygame.K_a]:
+                    sprite.rect.x += PLAYER_SPEED
 
-            if keys[pygame.K_w]:
-                self.rect.y -= PLAYER_SPEED
+                if keys[pygame.K_w]:
+                    sprite.rect.y += PLAYER_SPEED
 
-            if keys[pygame.K_s]:
-                self.rect.y += PLAYER_SPEED
+                if keys[pygame.K_s]:
+                    sprite.rect.y -= PLAYER_SPEED
 
 
 class Button(pygame.sprite.Sprite):
