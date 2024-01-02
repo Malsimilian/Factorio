@@ -90,7 +90,7 @@ class Game:
             for j in range(5):
                 Ground(self, j, i)
 
-        for kol in range(16):
+        for kol in range(128):
             Ore(self, random.randint(0, 127), random.randint(0, 127))
 
         for sprite in self.all:
