@@ -16,6 +16,10 @@ class Game:
         self.click = False  # нажаата ли ЛКМ
         self.facing = "вниз"  # направление модулей
 
+        self.build_object = Conveyor
+        self.build_objects = (Conveyor, Conveyor)
+        self.last_wheel = 200
+
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
@@ -36,13 +40,33 @@ class Game:
 
     def events(self):
         self.click = False
+        self.right_click = False
+        self.left_click = False
         for event in pygame.event.get():
             self.event = event
             if self.event.type == pygame.QUIT:
                 self.runnig = False
-
             if self.event.type == pygame.MOUSEBUTTONDOWN:
+                pressed = pygame.mouse.get_pressed()
+                if pressed[2]:
+                    self.right_click = True
+                if pressed[0]:
+                    self.left_click = True
+                if pressed[1]:
+                    self.change_build_object()
                 self.click = True
+
+    def change_build_object(self):
+        if pygame.time.get_ticks() - self.last_wheel >= 200:
+            self.last_wheel = pygame.time.get_ticks()
+            print(self.build_object)
+            index = self.build_objects.index(self.build_object)
+            if index != len(self.build_objects) - 2:
+                next = index + 1
+            else:
+                next = 0
+            self.build_object = self.build_objects[next]
+
 
     def main(self): #игровой цикл
         while self.runnig:
