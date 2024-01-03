@@ -14,7 +14,7 @@ class Game:
         self.runnig = True
         self.playing = False  # момент начала игры
         self.click = False  # нажаата ли ЛКМ
-        self.facing = "вниз"  # направление модулей
+        self.facing = "вправо"  # направление модулей
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab)
