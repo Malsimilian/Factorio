@@ -300,7 +300,7 @@ class Facing(pygame.sprite.Sprite):
         self.rect.y = 0
 
         self.ind = 0
-        self.facings = ["вправо", "вниз", "вверх", "влево"]
+        self.facings = ["вправо", "вниз", "влево", "вверх"]
 
 
         self.last = 500
