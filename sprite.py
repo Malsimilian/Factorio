@@ -322,7 +322,7 @@ class Lab(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing):
         self.game = game
         self._layer = 2
-        self.groups = self.game.all, self.game.dynamic
+        self.groups = self.game.all, self.game.dynamic, self.game.storage
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([SIDE, SIDE])
@@ -332,7 +332,7 @@ class Lab(pygame.sprite.Sprite):
         self.rect.x = x * SIDE
         self.rect.y = y * SIDE
 
-        self.storage = 3
+        self.storage = 0
         self.next_storage = None
 
         self.last = 0  # последнее время get_ore в мл сек
@@ -342,9 +342,15 @@ class Lab(pygame.sprite.Sprite):
             self.image.fill('green')
         else:
             self.image.fill('blue')
-        if pygame.time.get_ticks() - self.last >= 1000:
+        if pygame.time.get_ticks() - self.last >= 4000:
             self.last = pygame.time.get_ticks()
             if self.storage:
                 self.storage -= 1
                 self.game.exp += 1
+
+    def next(self):
+        if not self.storage:
+            self.storage = self.next_storage
+            self.next_storage = None
+
 
