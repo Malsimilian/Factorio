@@ -293,7 +293,7 @@ class Facing(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([SIDE * 2, SIDE * 2])
-        self.image.blit(pygame.image.load("img/Направление_вниз.png"), (0, 0))
+        self.image.blit(pygame.image.load("img/Направление_вправо.png"), (0, 0))
 
         self.rect = self.image.get_rect()
         self.rect.x = WIN_WIDTH - 80
