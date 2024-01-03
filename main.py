@@ -15,6 +15,7 @@ class Game:
         self.playing = False  # момент начала игры
         self.click = False  # нажаата ли ЛКМ
         self.facing = "вправо"  # направление модулей
+        self.exp = 0
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab)
@@ -74,8 +75,16 @@ class Game:
             self.events()
             self.draw()
             self.update()
+            self.check_win()
 
         self.runnig = False
+
+    def check_win(self):
+        if self.exp >= 100:
+            self.is_win = True
+        else:
+            self.is_win = False
+
 
     def intro_screen(self):
         Button(self, 500, 500, self.create_map)

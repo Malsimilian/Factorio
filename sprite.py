@@ -332,7 +332,7 @@ class Lab(pygame.sprite.Sprite):
         self.rect.x = x * SIDE
         self.rect.y = y * SIDE
 
-        self.storage = None
+        self.storage = 3
         self.next_storage = None
 
         self.last = 0  # последнее время get_ore в мл сек
@@ -342,3 +342,9 @@ class Lab(pygame.sprite.Sprite):
             self.image.fill('green')
         else:
             self.image.fill('blue')
+        if pygame.time.get_ticks() - self.last >= 1000:
+            self.last = pygame.time.get_ticks()
+            if self.storage:
+                self.storage -= 1
+                self.game.exp += 1
+
