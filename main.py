@@ -17,7 +17,7 @@ class Game:
         self.facing = "вниз"  # направление модулей
 
         self.build_object = Conveyor
-        self.build_objects = (Conveyor, Mine)
+        self.build_objects = (Conveyor, Mine, Lab)
         self.last_wheel = 200
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
@@ -60,7 +60,6 @@ class Game:
     def change_build_object(self):
         if pygame.time.get_ticks() - self.last_wheel >= 200:
             self.last_wheel = pygame.time.get_ticks()
-            print(self.build_object)
             index = self.build_objects.index(self.build_object)
             if index != len(self.build_objects) - 1:
                 next = index + 1
@@ -101,9 +100,7 @@ class Game:
         self.playing = True
         Facing(self)
         Player(self)
-        #Conveyor(self, 0, 0, "вправо", Item(self))
-        Ore(self, 0, 0)
-        Mine(self, 0, 0, "вправо")
+
 
 g = Game()
 #g.intro_screen()

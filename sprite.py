@@ -300,7 +300,8 @@ class Facing(pygame.sprite.Sprite):
         self.rect.y = 0
 
         self.ind = 0
-        self.facings = ["вниз", "вправо", "вверх", "влево"]
+        self.facings = ["вправо", "вниз", "вверх", "влево"]
+
 
         self.last = 500
 
@@ -315,3 +316,29 @@ class Facing(pygame.sprite.Sprite):
 
                 self.game.facing = self.facings[self.ind]
                 self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
+
+
+class Lab(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, facing):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all, self.game.dynamic
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([SIDE, SIDE])
+        self.image.fill('blue')
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * SIDE
+        self.rect.y = y * SIDE
+
+        self.storage = None
+        self.next_storage = None
+
+        self.last = 0  # последнее время get_ore в мл сек
+
+    def update(self):
+        if self.storage:
+            self.image.fill('green')
+        else:
+            self.image.fill('blue')
