@@ -87,145 +87,6 @@ class BuildObject(pygame.sprite.Sprite):
         return self.name
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, game):
-        self.game = game
-        self._layer = 4
-        self.groups = self.game.all
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.width = self.height = SIDE
-        self.image = pygame.Surface([SIDE, SIDE])
-
-        image_to_load = pygame.image.load('img/Безымянный.png')
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.set_colorkey(BLACK)
-        self.image.blit(image_to_load, (0, 0))
-
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
-        #  * random.randint(-5, +5)  * random.randint(-5, +5)
-        self.last = 0
-
-    def update(self):
-        keys = pygame.key.get_pressed()
-        if pygame.time.get_ticks() - self.last >= 75:
-            self.last = pygame.time.get_ticks()
-            for sprite in self.game.dynamic:
-                if keys[pygame.K_d]:
-                    sprite.rect.x -= PLAYER_SPEED
-
-                if keys[pygame.K_a]:
-                    sprite.rect.x += PLAYER_SPEED
-
-                if keys[pygame.K_w]:
-                    sprite.rect.y += PLAYER_SPEED
-
-                if keys[pygame.K_s]:
-                    sprite.rect.y -= PLAYER_SPEED
-
-
-class Button(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, event):
-        self.game = game
-        self._layer = 4
-        self.groups = self.game.all
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([192, 96])
-        image_to_load = pygame.image.load('img/Кнопка играть.png')
-        self.image.set_colorkey(BLACK)
-        self.image.blit(image_to_load, (0, 0))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-        self.event = event
-
-    def update(self):
-        hits = pygame.sprite.spritecollide(self, self.game.mouse, False)
-        if hits:
-            if self.game.click:
-                self.event()
-
-
-class Mouse(pygame.sprite.Sprite):
-    def __init__(self, game):
-        self.game = game
-        self._layer = 4
-        self.groups = self.game.all, self.game.mouse
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.width = self.height = 8
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(RED)
-
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
-
-    def update(self):
-        self.rect.center = pygame.mouse.get_pos()
-        if self.game.right_click:
-            self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
-        if self.game.left_click:
-            for object in self.game.all:
-                if isinstance(object, Mouse) or isinstance(object, Ore):
-                    pass
-                elif object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
-                        object.kill()
-
-
-class Ground(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.game = game
-        self._layer = 1
-        self.groups = self.game.all, self.game.dynamic
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([1024, 1024])
-        self.image.blit(pygame.image.load("img/Гига_Земля.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x * 1024
-        self.rect.y = y * 1024
-
-
-class Ore(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.game = game
-        self._layer = 2
-        self.groups = self.game.all, self.game.dynamic, self.game.ores
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([40, 40])
-        self.image.blit(pygame.image.load("img/Руда_1.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x * 40
-        self.rect.y = y * 40
-
-
-class Item(pygame.sprite.Sprite):
-    def __init__(self, game):
-        self.game = game
-        self._layer = 1
-        self.groups = self.game.all, self.game.dynamic
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([24, 24])
-        self.image.fill(RED)
-
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
-
-        self.type = 0
-
-
 class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Бур')
@@ -373,4 +234,140 @@ class Lab(BuildObject):
         return 'Lab'
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 4
+        self.groups = self.game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
 
+        self.width = self.height = SIDE
+        self.image = pygame.Surface([SIDE, SIDE])
+
+        image_to_load = pygame.image.load('img/Безымянный.png')
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.set_colorkey(BLACK)
+        self.image.blit(image_to_load, (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
+        #  * random.randint(-5, +5)  * random.randint(-5, +5)
+        self.last = 0
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if pygame.time.get_ticks() - self.last >= 75:
+            self.last = pygame.time.get_ticks()
+            for sprite in self.game.dynamic:
+                if keys[pygame.K_d]:
+                    sprite.rect.x -= PLAYER_SPEED
+
+                if keys[pygame.K_a]:
+                    sprite.rect.x += PLAYER_SPEED
+
+                if keys[pygame.K_w]:
+                    sprite.rect.y += PLAYER_SPEED
+
+                if keys[pygame.K_s]:
+                    sprite.rect.y -= PLAYER_SPEED
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, event):
+        self.game = game
+        self._layer = 4
+        self.groups = self.game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([192, 96])
+        image_to_load = pygame.image.load('img/Кнопка играть.png')
+        self.image.set_colorkey(BLACK)
+        self.image.blit(image_to_load, (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.event = event
+
+    def update(self):
+        hits = pygame.sprite.spritecollide(self, self.game.mouse, False)
+        if hits:
+            if self.game.click:
+                self.event()
+
+
+class Mouse(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 4
+        self.groups = self.game.all, self.game.mouse
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = self.height = 8
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(RED)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+    def update(self):
+        self.rect.center = pygame.mouse.get_pos()
+        if self.game.right_click:
+            self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+        if self.game.left_click:
+            for object in self.game.all:
+                if isinstance(object, Mouse) or isinstance(object, Ore):
+                    pass
+                elif object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                        object.kill()
+
+
+class Ground(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = 1
+        self.groups = self.game.all, self.game.dynamic
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([1024, 1024])
+        self.image.blit(pygame.image.load("img/Гига_Земля.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * 1024
+        self.rect.y = y * 1024
+
+
+class Ore(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all, self.game.dynamic, self.game.ores
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([40, 40])
+        self.image.blit(pygame.image.load("img/Руда_1.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * 40
+        self.rect.y = y * 40
+
+
+class Item(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 1
+        self.groups = self.game.all, self.game.dynamic
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([24, 24])
+        self.image.fill(RED)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+        self.type = 0
