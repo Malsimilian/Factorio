@@ -62,6 +62,31 @@ class Facing(Interface):
                 self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
 
 
+class BuildObject(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, facing, name):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all, self.game.dynamic, self.game.storage
+
+        super().__init__(self.groups)
+
+        self.image = pygame.Surface([SIDE, SIDE])
+        if facing is not None:
+            self.image.blit(pygame.image.load(f"img/{name}_{facing}.png"), (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x * SIDE
+        self.rect.y = y * SIDE
+
+        self.name = name
+
+        self.last = 0
+        self.facing = facing
+
+    def __str__(self):
+        return self.name
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
@@ -201,22 +226,10 @@ class Item(pygame.sprite.Sprite):
         self.type = 0
 
 
-class Mine(pygame.sprite.Sprite):
+class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
-        self.game = game
-        self._layer = 1
-        self.groups = self.game.all, self.game.dynamic
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([SIDE, SIDE])
-        self.image.fill(RED)
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x * SIDE
-        self.rect.y = y * SIDE
-
-        self.last = 0  # последнее время get_ore в мл сек
-        self.facing = facing
+        super().__init__(game, x, y, facing, 'Бур')
+        self.remove(self.game.storage)
 
     def update(self):
         hits = pygame.sprite.spritecollide(self, self.game.ores, False)
@@ -235,30 +248,14 @@ class Mine(pygame.sprite.Sprite):
                                 sprite.next_storage = 1
                         break
 
-    def __str__(self):
-        return 'Mine'
 
-
-class Conveyor(pygame.sprite.Sprite):
+class Conveyor(BuildObject):
     def __init__(self, game, x, y, facing, st=None):
-        self.game = game
-        self._layer = 2
-        self.groups = self.game.all, self.game.dynamic, self.game.storage
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.facing = facing
-
-        self.image = pygame.Surface([SIDE, SIDE])
-        self.image.blit(pygame.image.load("img/Конвейер_" + self.facing +".png"), (0, 0))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x * SIDE
-        self.rect.y = y * SIDE
+        super().__init__(game, x, y, facing, 'Конвейер')
 
         self.next_storage = None
         self.peredacha = False
-        self.storage = st  # хранилище в данный момент
-        self.last = 2000
+        self.storage = st
 
     def update(self):
         if pygame.time.get_ticks() - self.last >= 1000:
@@ -346,28 +343,15 @@ class Conveyor(pygame.sprite.Sprite):
             else:
                 self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
-    def __str__(self):
-        return 'Conveyor'
 
-
-class Lab(pygame.sprite.Sprite):
+class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
-        self.game = game
-        self._layer = 2
-        self.groups = self.game.all, self.game.dynamic, self.game.storage
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        super().__init__(game, x, y, None, 'Лаборотория')
 
-        self.image = pygame.Surface([SIDE, SIDE])
         self.image.fill('blue')
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x * SIDE
-        self.rect.y = y * SIDE
 
         self.storage = 0
         self.next_storage = None
-
-        self.last = 0  # последнее время get_ore в мл сек
 
     def update(self):
         if self.storage:
