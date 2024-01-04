@@ -1,6 +1,7 @@
 import pygame, random
 from config import *
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
@@ -88,9 +89,7 @@ class Mouse(pygame.sprite.Sprite):
                 if isinstance(object, Mouse) or isinstance(object, Ore):
                     pass
                 elif object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
-                        print(object, 'УБИТ МНОЙ')
                         object.kill()
-
 
 
 class Ground(pygame.sprite.Sprite):
@@ -175,6 +174,9 @@ class Mine(pygame.sprite.Sprite):
                             if not sprite.storage:
                                 sprite.next_storage = 1
                         break
+
+    def __str__(self):
+        return 'Mine'
 
 
 class Conveyor(pygame.sprite.Sprite):
@@ -284,6 +286,9 @@ class Conveyor(pygame.sprite.Sprite):
             else:
                 self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
+    def __str__(self):
+        return 'Conveyor'
+
 
 class Facing(pygame.sprite.Sprite):
     def __init__(self, game):
@@ -353,4 +358,30 @@ class Lab(pygame.sprite.Sprite):
             self.storage = self.next_storage
             self.next_storage = None
 
+    def __str__(self):
+        return 'Lab'
 
+
+class Info(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 3
+        self.groups = game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([SIDE * 23, SIDE])
+        self.image.fill((200, 200, 200))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+        self.last = 0
+    def update(self):
+        if pygame.time.get_ticks() - self.last >= 10:
+            self.last = pygame.time.get_ticks()
+            self.image.fill((200, 200, 200))
+        f1 = pygame.font.Font(None, 60)
+        text1 = f1.render('Текущий обЪект ' + str(self.game.info_build_object), True,
+                          (0, 0, 0))
+        self.image.blit(text1, self.rect)

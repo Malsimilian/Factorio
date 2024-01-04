@@ -19,6 +19,8 @@ class Game:
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab)
+        self.info_build_object = 'Conveyor'
+        self.info_build_objects = ('Conveyor', 'Mine', 'Lab')
         self.last_wheel = 200
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
@@ -67,8 +69,13 @@ class Game:
             else:
                 next = 0
             self.build_object = self.build_objects[next]
-            print('Текущий обЪект' + str(self.build_object))
 
+            index = self.info_build_objects.index(self.info_build_object)
+            if index != len(self.info_build_objects) - 1:
+                next = index + 1
+            else:
+                next = 0
+            self.info_build_object = self.info_build_objects[next]
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -108,6 +115,7 @@ class Game:
 
         self.playing = True
         Facing(self)
+        Info(self)
         Player(self)
 
 
