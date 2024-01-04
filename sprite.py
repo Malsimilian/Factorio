@@ -108,6 +108,30 @@ class Mine(BuildObject):
                             if not sprite.storage:
                                 sprite.next_storage = 1
                         break
+            if self.facing == "влево":
+                for sprite in self.game.storage:
+                    if sprite.rect.x == self.rect.x - SIDE and sprite.rect.y == self.rect.y:
+                        self.sprite = sprite
+                        if not sprite.next_storage:
+                            if not sprite.storage:
+                                sprite.next_storage = 1
+                        break
+            if self.facing == "вниз":
+                for sprite in self.game.storage:
+                    if sprite.rect.x == self.rect.x and sprite.rect.y == self.rect.y + SIDE:
+                        self.sprite = sprite
+                        if not sprite.next_storage:
+                            if not sprite.storage:
+                                sprite.next_storage = 1
+                        break
+            if self.facing == "вверх":
+                for sprite in self.game.storage:
+                    if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y - SIDE:
+                        self.sprite = sprite
+                        if not sprite.next_storage:
+                            if not sprite.storage:
+                                sprite.next_storage = 1
+                        break
 
 
 class Conveyor(BuildObject):
