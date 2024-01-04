@@ -2,6 +2,66 @@ import pygame, random
 from config import *
 
 
+class Interface(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 3
+        self.groups = game.all
+        super().__init__(self.groups)
+
+
+class Info(Interface):
+    def __init__(self, game):
+        super().__init__(game)
+
+        self.image = pygame.Surface([SIDE * 23, SIDE])
+        self.image.fill((200, 200, 200))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+        self.last = 0
+    def update(self):
+        if pygame.time.get_ticks() - self.last >= 10:
+            self.last = pygame.time.get_ticks()
+            self.image.fill((200, 200, 200))
+        f1 = pygame.font.Font(None, 60)
+        text1 = f1.render('Текущий обЪект ' + str(self.game.info_build_object), True,
+                          (0, 0, 0))
+        self.image.blit(text1, self.rect)
+
+
+class Facing(Interface):
+    def __init__(self, game):
+        super().__init__(game)
+
+        self.image = pygame.Surface([SIDE * 2, SIDE * 2])
+        self.image.blit(pygame.image.load("img/Направление_вправо.png"), (0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = WIN_WIDTH - 80
+        self.rect.y = 0
+
+        self.ind = 0
+        self.facings = ["вправо", "вниз", "влево", "вверх"]
+
+
+        self.last = 500
+
+    def update(self):
+        if pygame.time.get_ticks() - self.last >= 200:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_r]:
+                self.last = pygame.time.get_ticks()
+                self.ind += 1
+                if self.ind == 4:
+                    self.ind = 0
+
+                self.game.facing = self.facings[self.ind]
+                self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
@@ -290,39 +350,6 @@ class Conveyor(pygame.sprite.Sprite):
         return 'Conveyor'
 
 
-class Facing(pygame.sprite.Sprite):
-    def __init__(self, game):
-        self.game = game
-        self._layer = 3
-        self.groups = self.game.all
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.image = pygame.Surface([SIDE * 2, SIDE * 2])
-        self.image.blit(pygame.image.load("img/Направление_вправо.png"), (0, 0))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = WIN_WIDTH - 80
-        self.rect.y = 0
-
-        self.ind = 0
-        self.facings = ["вправо", "вниз", "влево", "вверх"]
-
-
-        self.last = 500
-
-    def update(self):
-        if pygame.time.get_ticks() - self.last >= 200:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
-                self.last = pygame.time.get_ticks()
-                self.ind += 1
-                if self.ind == 4:
-                    self.ind = 0
-
-                self.game.facing = self.facings[self.ind]
-                self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
-
-
 class Lab(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing):
         self.game = game
@@ -362,26 +389,4 @@ class Lab(pygame.sprite.Sprite):
         return 'Lab'
 
 
-class Info(pygame.sprite.Sprite):
-    def __init__(self, game):
-        self.game = game
-        self._layer = 3
-        self.groups = game.all
-        pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.image = pygame.Surface([SIDE * 23, SIDE])
-        self.image.fill((200, 200, 200))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
-
-        self.last = 0
-    def update(self):
-        if pygame.time.get_ticks() - self.last >= 10:
-            self.last = pygame.time.get_ticks()
-            self.image.fill((200, 200, 200))
-        f1 = pygame.font.Font(None, 60)
-        text1 = f1.render('Текущий обЪект ' + str(self.game.info_build_object), True,
-                          (0, 0, 0))
-        self.image.blit(text1, self.rect)
