@@ -230,27 +230,28 @@ class Conveyor(BuildObject):
     #             self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
     def update(self):
+        self.find_item()
+        self.move_item()
+
+    def find_item(self):
         for item in self.game.items:
             if item.object == self:
                 self.item = item
+
+    def move_item(self):
         if self.item is None:
             return
         if pygame.time.get_ticks() - self.item.last < 100:
             return
-        self.item.last = pygame.time.get_ticks()
         if self.facing == 'вправо':
-            self.item.rect.x += SIDE
-            self.item = None
-        if self.facing == 'влево':
-            self.item.rect.x -= SIDE
-            self.item = None
-        if self.facing == 'вниз':
-            self.item.rect.y += SIDE
-            self.item = None
-        if self.facing == 'вверх':
-            self.item.rect.y -= SIDE
-            self.item = None
-
+            self.item.move(SIDE, 0)
+        elif self.facing == 'влево':
+            self.item.move(-SIDE, 0)
+        elif self.facing == 'вниз':
+            self.item.move(0, SIDE)
+        elif self.facing == 'вверх':
+            self.item.move(0, -SIDE)
+        self.item = None
 
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
@@ -440,3 +441,4 @@ class Item(pygame.sprite.Sprite):
     def move(self, x, y):
         self.rect.x += x
         self.rect.y += y
+        self.last = pygame.time.get_ticks()
