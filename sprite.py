@@ -115,12 +115,8 @@ class Mine(BuildObject):
 
 
 class Conveyor(BuildObject):
-    def __init__(self, game, x, y, facing, st=None):
+    def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Конвейер')
-
-        self.next_storage = None
-        self.peredacha = False
-        self.storage = st
         self.item = None
 
     def update(self):
