@@ -360,11 +360,19 @@ class Mouse(pygame.sprite.Sprite):
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
         if self.game.right_click:
-            self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+            self.build()
         if self.game.left_click:
-            for object in self.game.builds:
-                if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
-                        object.kill()
+            self.kill_object()
+
+    def build(self):
+        object = self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+        pygame.sprite.spritecollide(object, self.game.builds, True)
+        object = self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
+
+    def kill_object(self):
+        for object in self.game.builds:
+            if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                object.kill()
 
 
 class Ground(pygame.sprite.Sprite):
