@@ -113,7 +113,6 @@ class Mine(BuildObject):
             ore.move(0, -SIDE)
 
 
-
 class Conveyor(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Конвейер')
@@ -122,6 +121,7 @@ class Conveyor(BuildObject):
     def update(self):
         self.find_item()
         self.move_item()
+        self.move_player()
 
     def find_item(self):
         for item in self.game.items:
@@ -142,6 +142,27 @@ class Conveyor(BuildObject):
         elif self.facing == 'вверх':
             self.item.move(0, -SIDE)
         self.item = None
+
+    def move_player(self):
+        if pygame.time.get_ticks() - self.last < 100:
+            return
+        if not pygame.sprite.spritecollide(self, self.game.player, False):
+            return
+        for sprite in self.game.dynamic:
+            if self.facing == 'вправо':
+                sprite.rect.x -= SIDE
+            elif self.facing == 'влево':
+                sprite.rect.x += SIDE
+            elif self.facing == 'вниз':
+                sprite.rect.y -= SIDE
+            elif self.facing == 'вверх':
+                sprite.rect.y += SIDE
+
+
+class PullConveyor(Conveyor):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, facing)
+        self.image.blit(pygame.image.load(f"img/Вытягивающий_Конвейер_{facing}.png"), (0, 0))
 
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
@@ -176,7 +197,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 4
-        self.groups = self.game.all
+        self.groups = self.game.all, self.game.player
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.width = self.height = SIDE
@@ -333,6 +354,7 @@ class Item(pygame.sprite.Sprite):
         self.rect.y += y
         self.last = pygame.time.get_ticks()
 
+
 class ItemIronOre(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Предмет железная руда')
@@ -341,3 +363,8 @@ class ItemIronOre(Item):
 class IronPalka(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Железная палка')
+
+
+class IronPlate(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Железная пластина')
