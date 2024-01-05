@@ -119,7 +119,6 @@ class Game:
         self.playing = True
         Facing(self)
         Info(self)
-        ItemIronOre(self, 10, 10)
         Player(self)
 
 
