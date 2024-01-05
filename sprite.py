@@ -22,6 +22,7 @@ class Info(Interface):
         self.rect.y = 0
 
         self.last = 0
+
     def update(self):
         if pygame.time.get_ticks() - self.last >= 10:
             self.last = pygame.time.get_ticks()
@@ -45,7 +46,6 @@ class Facing(Interface):
 
         self.ind = 0
         self.facings = ["вправо", "вниз", "влево", "вверх"]
-
 
         self.last = 500
 
@@ -235,6 +235,9 @@ class Conveyor(BuildObject):
                 self.item = item
         if self.item is None:
             return
+        if pygame.time.get_ticks() - self.item.last < 100:
+            return
+        self.item.last = pygame.time.get_ticks()
         if self.facing == 'вправо':
             self.item.rect.x += SIDE
             self.item = None
@@ -247,7 +250,6 @@ class Conveyor(BuildObject):
         if self.facing == 'вверх':
             self.item.rect.y -= SIDE
             self.item = None
-
 
 
 class Lab(BuildObject):
@@ -423,6 +425,7 @@ class Item(pygame.sprite.Sprite):
 
         self.type = 0
         self.object = None
+        self.last = 0
 
     def update(self):
         self.find_object()
@@ -434,4 +437,6 @@ class Item(pygame.sprite.Sprite):
             object = None
         self.object = object
 
-
+    def move(self, x, y):
+        self.rect.x += x
+        self.rect.y += y
