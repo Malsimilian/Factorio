@@ -111,7 +111,7 @@ class Mine(BuildObject):
             ore.move(0, SIDE)
         elif self.facing == 'вверх':
             ore.move(0, -SIDE)
-        print(self.rect, ore.rect)
+
 
 
 class Conveyor(BuildObject):
