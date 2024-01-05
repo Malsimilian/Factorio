@@ -73,6 +73,7 @@ class BuildObject(pygame.sprite.Sprite):
         self.image = pygame.Surface([SIDE, SIDE])
         if facing is not None:
             self.image.blit(pygame.image.load(f"img/{name}_{facing}.png"), (0, 0))
+            self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
         self.rect.x = x * SIDE
@@ -411,20 +412,20 @@ class Ore(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, image):
         self.game = game
         self._layer = 4
         self.groups = self.game.all, self.game.dynamic, self.game.items
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([24, 24])
-        self.image.fill((50, 50, 50))
+        self.image.blit(pygame.image.load(f"img/{image}.xcf"), (0, 0))
+        self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
         self.rect.x = x * 40 + 8
         self.rect.y = y * 40 + 8
 
-        self.type = 0
         self.object = None
         self.last = 0
 
@@ -442,3 +443,12 @@ class Item(pygame.sprite.Sprite):
         self.rect.x += x
         self.rect.y += y
         self.last = pygame.time.get_ticks()
+
+class ItemIronOre(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Предмет железная руда')
+
+
+class IronPalka(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Железная палка')
