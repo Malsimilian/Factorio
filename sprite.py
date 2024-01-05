@@ -141,92 +141,113 @@ class Conveyor(BuildObject):
         self.next_storage = None
         self.peredacha = False
         self.storage = st
+        self.item = None
+
+    # def update(self):
+    #     if pygame.time.get_ticks() - self.last >= 1000:
+    #         self.last = pygame.time.get_ticks()
+    #         self.peredacha = False
+    #         self.sprite = None
+    #         if self.storage != None:
+    #             if self.facing == "вверх":
+    #                 for sprite in self.game.storage:
+    #                     if sprite.rect.x == self.rect.x and sprite.rect.y == self.rect.y - SIDE:
+    #                         self.sprite = sprite
+    #                         if not sprite.next_storage:
+    #                             if not sprite.storage:
+    #                                 sprite.next_storage = self.storage
+    #                                 self.peredacha = True
+    #                         break
+    #
+    #             if self.facing == "вниз":
+    #                 for sprite in self.game.storage:
+    #                     if sprite.rect.x == self.rect.x and sprite.rect.y == self.rect.y + SIDE:
+    #                         self.sprite = sprite
+    #                         if not sprite.next_storage:
+    #                             if not sprite.storage:
+    #                                 sprite.next_storage = self.storage
+    #                                 self.peredacha = True
+    #                         break
+    #
+    #             if self.facing == "вправо":
+    #                 for sprite in self.game.storage:
+    #                     if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y:
+    #                         self.sprite = sprite
+    #                         if not sprite.next_storage:
+    #                             if not sprite.storage:
+    #                                 sprite.next_storage = self.storage
+    #                                 self.peredacha = True
+    #                         break
+    #
+    #             if self.facing == "влево":
+    #                 for sprite in self.game.storage:
+    #                     if sprite.rect.x == self.rect.x - SIDE and sprite.rect.y == self.rect.y:
+    #                         self.sprite = sprite
+    #                         if not sprite.next_storage:
+    #                             if not sprite.storage:
+    #                                 sprite.next_storage = self.storage
+    #                                 self.peredacha = True
+    #                         break
+    #
+    # def next(self):
+    #     try:
+    #         if self.sprite.peredacha:
+    #             self.sprite.next_storage = self.storage
+    #             self.peredacha = True
+    #     except AttributeError:
+    #         pass
+    #     if not self.storage:
+    #         self.storage = self.next_storage
+    #         self.next_storage = None
+    #
+    #     elif self.peredacha:
+    #         self.storage = self.next_storage
+    #         self.next_storage = None
+    #         self.peredacha = False
+    #
+    #     if self.facing == "вправо":
+    #         if self.storage:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вправо_зап.png"), (0, 0))
+    #         else:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вправо.png"), (0, 0))
+    #
+    #     elif self.facing == "влево":
+    #         if self.storage:
+    #             self.image.blit(pygame.image.load("img/Конвейер_влево_зап.png"), (0, 0))
+    #         else:
+    #             self.image.blit(pygame.image.load("img/Конвейер_влево.png"), (0, 0))
+    #
+    #     elif self.facing == "вверх":
+    #         if self.storage:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вверх_зап.png"), (0, 0))
+    #         else:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вверх.png"), (0, 0))
+    #
+    #     elif self.facing == "вниз":
+    #         if self.storage:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вниз_зап.png"), (0, 0))
+    #         else:
+    #             self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
     def update(self):
-        if pygame.time.get_ticks() - self.last >= 1000:
-            self.last = pygame.time.get_ticks()
-            self.peredacha = False
-            self.sprite = None
-            if self.storage != None:
-                if self.facing == "вверх":
-                    for sprite in self.game.storage:
-                        if sprite.rect.x == self.rect.x and sprite.rect.y == self.rect.y - SIDE:
-                            self.sprite = sprite
-                            if not sprite.next_storage:
-                                if not sprite.storage:
-                                    sprite.next_storage = self.storage
-                                    self.peredacha = True
-                            break
+        for item in self.game.items:
+            if item.object == self:
+                self.item = item
+        if self.item is None:
+            return
+        if self.facing == 'вправо':
+            self.item.rect.x += SIDE
+            self.item = None
+        if self.facing == 'влево':
+            self.item.rect.x -= SIDE
+            self.item = None
+        if self.facing == 'вниз':
+            self.item.rect.y += SIDE
+            self.item = None
+        if self.facing == 'вверх':
+            self.item.rect.y -= SIDE
+            self.item = None
 
-                if self.facing == "вниз":
-                    for sprite in self.game.storage:
-                        if sprite.rect.x == self.rect.x and sprite.rect.y == self.rect.y + SIDE:
-                            self.sprite = sprite
-                            if not sprite.next_storage:
-                                if not sprite.storage:
-                                    sprite.next_storage = self.storage
-                                    self.peredacha = True
-                            break
-
-                if self.facing == "вправо":
-                    for sprite in self.game.storage:
-                        if sprite.rect.x == self.rect.x + SIDE and sprite.rect.y == self.rect.y:
-                            self.sprite = sprite
-                            if not sprite.next_storage:
-                                if not sprite.storage:
-                                    sprite.next_storage = self.storage
-                                    self.peredacha = True
-                            break
-
-                if self.facing == "влево":
-                    for sprite in self.game.storage:
-                        if sprite.rect.x == self.rect.x - SIDE and sprite.rect.y == self.rect.y:
-                            self.sprite = sprite
-                            if not sprite.next_storage:
-                                if not sprite.storage:
-                                    sprite.next_storage = self.storage
-                                    self.peredacha = True
-                            break
-
-    def next(self):
-        try:
-            if self.sprite.peredacha:
-                self.sprite.next_storage = self.storage
-                self.peredacha = True
-        except AttributeError:
-            pass
-        if not self.storage:
-            self.storage = self.next_storage
-            self.next_storage = None
-
-        elif self.peredacha:
-            self.storage = self.next_storage
-            self.next_storage = None
-            self.peredacha = False
-
-        if self.facing == "вправо":
-            if self.storage:
-                self.image.blit(pygame.image.load("img/Конвейер_вправо_зап.png"), (0, 0))
-            else:
-                self.image.blit(pygame.image.load("img/Конвейер_вправо.png"), (0, 0))
-
-        elif self.facing == "влево":
-            if self.storage:
-                self.image.blit(pygame.image.load("img/Конвейер_влево_зап.png"), (0, 0))
-            else:
-                self.image.blit(pygame.image.load("img/Конвейер_влево.png"), (0, 0))
-
-        elif self.facing == "вверх":
-            if self.storage:
-                self.image.blit(pygame.image.load("img/Конвейер_вверх_зап.png"), (0, 0))
-            else:
-                self.image.blit(pygame.image.load("img/Конвейер_вверх.png"), (0, 0))
-
-        elif self.facing == "вниз":
-            if self.storage:
-                self.image.blit(pygame.image.load("img/Конвейер_вниз_зап.png"), (0, 0))
-            else:
-                self.image.blit(pygame.image.load("img/Конвейер_вниз.png"), (0, 0))
 
 
 class Lab(BuildObject):
@@ -382,7 +403,7 @@ class Item(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
         self._layer = 4
-        self.groups = self.game.all, self.game.dynamic
+        self.groups = self.game.all, self.game.dynamic, self.game.items
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([24, 24])
@@ -390,6 +411,19 @@ class Item(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.x = x * 40 + 8
-        self.rect.y = x * 40 + 8
+        self.rect.y = y * 40 + 8
 
         self.type = 0
+        self.object = None
+
+    def update(self):
+        self.find_object()
+
+    def find_object(self):
+        try:
+            object = pygame.sprite.spritecollide(self, self.game.builds, False)[0]
+        except:
+            object = None
+        self.object = object
+
+

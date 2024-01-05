@@ -35,8 +35,8 @@ class Game:
 
     def update(self):
         self.all.update()
-        for sprite in self.storage:
-            sprite.next()
+        # for sprite in self.storage:
+        #     sprite.next()
 
     def draw(self):
         self.screen.fill(BLACK)
