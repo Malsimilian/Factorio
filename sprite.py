@@ -6,7 +6,7 @@ class Interface(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 3
-        self.groups = game.all
+        self.groups = game.all, game.interface
         super().__init__(self.groups)
 
 
@@ -66,7 +66,7 @@ class BuildObject(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, name):
         self.game = game
         self._layer = 2
-        self.groups = self.game.all, self.game.dynamic, self.game.storage
+        self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds
 
         super().__init__(self.groups)
 
@@ -341,10 +341,8 @@ class Mouse(pygame.sprite.Sprite):
         if self.game.right_click:
             self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
         if self.game.left_click:
-            for object in self.game.all:
-                if isinstance(object, Mouse) or isinstance(object, Ore):
-                    pass
-                elif object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+            for object in self.game.builds:
+                if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
                         object.kill()
 
 
@@ -381,17 +379,17 @@ class Ore(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game):
+    def __init__(self, game, x, y):
         self.game = game
-        self._layer = 1
+        self._layer = 4
         self.groups = self.game.all, self.game.dynamic
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([24, 24])
-        self.image.fill(RED)
+        self.image.fill((50, 50, 50))
 
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        self.rect.x = x * 40 + 8
+        self.rect.y = x * 40 + 8
 
         self.type = 0

@@ -29,6 +29,9 @@ class Game:
         self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
         self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем
         self.ores = pygame.sprite.LayeredUpdates()
+        self.builds = pygame.sprite.LayeredUpdates()  # для всех построек
+        self.interface = pygame.sprite.LayeredUpdates()  # для всего интерфейса
+        self.items = pygame.sprite.LayeredUpdates()  # для всех предметов
 
     def update(self):
         self.all.update()
@@ -116,6 +119,7 @@ class Game:
         self.playing = True
         Facing(self)
         Info(self)
+        Item(self, 10, 10)
         Player(self)
 
 
