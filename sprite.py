@@ -284,6 +284,8 @@ class Lab(BuildObject):
             self.item.kill()
             self.game.exp += 10
             self.item = None
+
+
 class AssemblyMachine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Assembling_machine')
@@ -494,5 +496,3 @@ class IronPlate(Item):
 class TechItem(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Технический предмет', 0)
-
-
