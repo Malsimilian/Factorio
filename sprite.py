@@ -28,7 +28,7 @@ class Info(Interface):
             self.last = pygame.time.get_ticks()
             self.image.fill((200, 200, 200))
         f1 = pygame.font.Font(None, 60)
-        text1 = f1.render('Текущий обЪект ' + str(self.game.info_build_object), True,
+        text1 = f1.render(self.game.info, True,
                           (0, 0, 0))
         self.image.blit(text1, self.rect)
 
@@ -265,33 +265,25 @@ class PullConveyor(Conveyor):
 
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Лаборотория')
-
-        self.image.fill('blue')
-
-        self.storage = 0
-        self.next_storage = None
+        super().__init__(game, x, y, None, 'Лаборатория')
+        self.image.blit(pygame.image.load(f"img/Лаборатория.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
 
     def update(self):
-        if self.storage:
-            self.image.fill('green')
-        else:
-            self.image.fill('blue')
-        if pygame.time.get_ticks() - self.last >= 4000:
-            self.last = pygame.time.get_ticks()
-            if self.storage:
-                self.storage -= 1
-                self.game.exp += 1
-
-    def next(self):
-        if not self.storage:
-            self.storage = self.next_storage
-            self.next_storage = None
-
-    def __str__(self):
-        return 'Lab'
-
-
+        self.find_item()
+        if self.item is None:
+            return
+        if pygame.time.get_ticks() - self.last < 1000:
+            return
+        self.last = pygame.time.get_ticks()
+        if isinstance(self.item, ItemIronOre):
+            self.item.kill()
+            self.game.exp += 1
+            self.item = None
+        elif isinstance(self.item, IronPlate):
+            self.item.kill()
+            self.game.exp += 10
+            self.item = None
 class AssemblyMachine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Assembling_machine')
@@ -497,7 +489,6 @@ class IronPalka(Item):
 class IronPlate(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Железная пластина')
-
 
 
 class TechItem(Item):

@@ -16,6 +16,7 @@ class Game:
         self.click = False  # нажаата ли ЛКМ
         self.facing = "вправо"  # направление модулей
         self.exp = 0
+        self.info = ''
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe)
@@ -84,6 +85,7 @@ class Game:
             self.draw()
             self.update()
             self.check_win()
+            self.update_info()
 
         self.runnig = False
 
@@ -93,10 +95,12 @@ class Game:
         else:
             self.is_win = False
 
-
     def intro_screen(self):
         Button(self, 500, 500, self.create_map)
         Mouse(self)
+
+    def update_info(self, info=''):
+        self.info = self.info_build_object + f' {self.exp} ' + info
 
     def create_map(self):
         for sprite in self.all:
