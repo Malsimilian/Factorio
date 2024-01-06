@@ -201,14 +201,47 @@ class PullConveyor(Conveyor):
             return
         if previous_item is None:
             return
+        previous_object = self.find_previous_object()
+        if previous_object is None:
+            return
+        elif isinstance(previous_object, Furnaсe):
+            if isinstance(previous_item, IronPlate):
+                if self.facing == 'вправо':
+                    previous_item.move(SIDE, 0)
+                elif self.facing == 'влево':
+                    previous_item.move(-SIDE, 0)
+                elif self.facing == 'вниз':
+                    previous_item.move(0, SIDE)
+                elif self.facing == 'вверх':
+                    previous_item.move(0, -SIDE)
+        elif isinstance(previous_object, Conveyor):
+            if self.facing == 'вправо':
+                previous_item.move(SIDE, 0)
+            elif self.facing == 'влево':
+                previous_item.move(-SIDE, 0)
+            elif self.facing == 'вниз':
+                previous_item.move(0, SIDE)
+            elif self.facing == 'вверх':
+                previous_item.move(0, -SIDE)
+
+    def find_previous_object(self):
         if self.facing == 'вправо':
-            previous_item.move(SIDE, 0)
+            for object in self.game.builds:
+                if object.rect.x + 40 == self.rect.x and object.rect.y == self.rect.y:
+                    return object
         elif self.facing == 'влево':
-            previous_item.move(-SIDE, 0)
+            for object in self.game.builds:
+                if object.rect.x - 40 == self.rect.x and object.rect.y == self.rect.y:
+                    return object
         elif self.facing == 'вниз':
-            previous_item.move(0, SIDE)
+            for object in self.game.builds:
+                if object.rect.x == self.rect.x and object.rect.y + 40 == self.rect.y:
+                    return object
         elif self.facing == 'вверх':
-            previous_item.move(0, -SIDE)
+            for object in self.game.builds:
+                if object.rect.x == self.rect.x and object.rect.y - 40 == self.rect.y:
+                    return object
+        return None
 
     def find_previous_item(self):
         if self.facing == 'вправо':
