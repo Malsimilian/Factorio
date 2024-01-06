@@ -84,26 +84,24 @@ class BuildObject(pygame.sprite.Sprite):
         self.last = 0
         self.facing = facing
         self.item = None
-
-    def __str__(self):
-        return self.name
+        self.tech_item = TechItem(game, x, y)
 
     def can_move(self):
         if self.facing == 'вправо':
             for item in self.game.items:
-                if item.rect.x - 40 == self.item.rect.x and item.rect.y == self.item.rect.y:
+                if item.rect.x - 40 == self.item.rect.x and item.rect.y == self.item.rect.y and not isinstance(item, TechItem):
                     return False
         elif self.facing == 'влево':
             for item in self.game.items:
-                if item.rect.x + 40 == self.item.rect.x and item.rect.y == self.item.rect.y:
+                if item.rect.x + 40 == self.item.rect.x and item.rect.y == self.item.rect.y and not isinstance(item, TechItem):
                     return False
         elif self.facing == 'вниз':
             for item in self.game.items:
-                if item.rect.x == self.item.rect.x and item.rect.y - 40 == self.item.rect.y:
+                if item.rect.x == self.item.rect.x and item.rect.y - 40 == self.item.rect.y and not isinstance(item, TechItem):
                     return False
         elif self.facing == 'вверх':
             for item in self.game.items:
-                if item.rect.x == self.item.rect.x and item.rect.y + 40 == self.item.rect.y:
+                if item.rect.x == self.item.rect.x and item.rect.y + 40 == self.item.rect.y and not isinstance(item, TechItem):
                     return False
         return True
 
@@ -112,8 +110,7 @@ class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Бур')
         self.remove(self.game.storage)
-        self.item = ItemIronOre(game, x, y)
-        print(self.item.rect.x, self.item.rect.y)
+        self.item = TechItem(game, x, y)
 
     def update(self):
         hits = pygame.sprite.spritecollide(self, self.game.ores, False)
@@ -148,7 +145,7 @@ class Conveyor(BuildObject):
 
     def find_item(self):
         for item in self.game.items:
-            if item.object == self:
+            if item.object == self and not isinstance(item, TechItem):
                 self.item = item
                 break
 
@@ -192,6 +189,42 @@ class PullConveyor(Conveyor):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing)
         self.image.blit(pygame.image.load(f"img/Вытягивающий_Конвейер_{facing}.png"), (0, 0))
+
+    def update(self):
+        self.find_item()
+        if self.item is not None:
+            return
+        previous_item = self.find_previous_item()
+        if previous_item is None:
+            return
+        if self.facing == 'вправо':
+            previous_item.move(SIDE, 0)
+        elif self.facing == 'влево':
+            previous_item.move(-SIDE, 0)
+        elif self.facing == 'вниз':
+            previous_item.move(0, SIDE)
+        elif self.facing == 'вверх':
+            previous_item.move(0, -SIDE)
+        super().update()
+
+    def find_previous_item(self):
+        if self.facing == 'вправо':
+            for item in self.game.items:
+                if item.rect.x + 40 == self.tech_item.rect.x and item.rect.y == self.tech_item.rect.y and not isinstance(item, TechItem):
+                    return item
+        elif self.facing == 'влево':
+            for item in self.game.items:
+                if item.rect.x - 40 == self.tech_item.rect.x and item.rect.y == self.tech_item.rect.y and not isinstance(item, TechItem):
+                    return item
+        elif self.facing == 'вниз':
+            for item in self.game.items:
+                if item.rect.x == self.tech_item.rect.x and item.rect.y + 40 == self.tech_item.rect.y and not isinstance(item, TechItem):
+                    return item
+        elif self.facing == 'вверх':
+            for item in self.game.items:
+                if item.rect.x == self.tech_item.rect.x and item.rect.y - 40 == self.tech_item.rect.y and not isinstance(item, TechItem):
+                    return item
+        return None
 
 
 class Lab(BuildObject):
@@ -316,6 +349,7 @@ class Mouse(pygame.sprite.Sprite):
     def kill_object(self):
         for object in self.game.builds:
             if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                object.tech_item.kill()
                 object.kill()
 
 
@@ -352,9 +386,9 @@ class Ore(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, image):
+    def __init__(self, game, x, y, image, layer=4):
         self.game = game
-        self._layer = 4
+        self._layer = layer
         self.groups = self.game.all, self.game.dynamic, self.game.items
         pygame.sprite.Sprite.__init__(self, self.groups)
 
@@ -398,3 +432,8 @@ class IronPalka(Item):
 class IronPlate(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Железная пластина')
+
+
+class TechItem(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Технический предмет', 0)
