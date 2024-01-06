@@ -112,7 +112,8 @@ class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Бур')
         self.remove(self.game.storage)
-        self.item = Ore(game, x, y)
+        self.item = ItemIronOre(game, x, y)
+        print(self.item.rect.x, self.item.rect.y)
 
     def update(self):
         hits = pygame.sprite.spritecollide(self, self.game.ores, False)
