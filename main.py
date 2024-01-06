@@ -49,10 +49,9 @@ class Game:
         self.right_click = False
         self.left_click = False
         for event in pygame.event.get():
-            self.event = event
-            if self.event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 self.runnig = False
-            if self.event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 pressed = pygame.mouse.get_pressed()
                 if pressed[2]:
                     self.right_click = True
