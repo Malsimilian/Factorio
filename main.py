@@ -18,9 +18,9 @@ class Game:
         self.exp = 0
 
         self.build_object = Conveyor
-        self.build_objects = (Conveyor, Mine, Lab, PullConveyor)
+        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe)
         self.info_build_object = 'Conveyor'
-        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor')
+        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace')
         self.last_wheel = 200
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!

@@ -105,6 +105,12 @@ class BuildObject(pygame.sprite.Sprite):
                     return False
         return True
 
+    def find_item(self):
+        for item in self.game.items:
+            if item.object == self and not isinstance(item, TechItem):
+                self.item = item
+                break
+
 
 class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
@@ -142,12 +148,6 @@ class Conveyor(BuildObject):
         self.find_item()
         self.move_item()
         # self.move_player()
-
-    def find_item(self):
-        for item in self.game.items:
-            if item.object == self and not isinstance(item, TechItem):
-                self.item = item
-                break
 
     def move_item(self):
         if self.item is None:
@@ -254,6 +254,35 @@ class Lab(BuildObject):
 
     def __str__(self):
         return 'Lab'
+
+
+class AssemblyMachine(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Assembling_machine')
+        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        self.find_item()
+
+
+class Furnaсe(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Furnace')
+        self.image.blit(pygame.image.load(f"img/Furnace.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        self.find_item()
+        if self.item is None:
+            return
+        if pygame.time.get_ticks() - self.last < 1000:
+            return
+        self.last = pygame.time.get_ticks()
+        if isinstance(self.item, ItemIronOre):
+            self.item.kill()
+            IronPlate(self.game, self.rect.x / 40, self.rect.y / 40)
+            self.item = None
 
 
 class Player(pygame.sprite.Sprite):
@@ -434,6 +463,9 @@ class IronPlate(Item):
         super().__init__(game, x, y, 'Железная пластина')
 
 
+
 class TechItem(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Технический предмет', 0)
+
+
