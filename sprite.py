@@ -83,15 +83,36 @@ class BuildObject(pygame.sprite.Sprite):
 
         self.last = 0
         self.facing = facing
+        self.item = None
 
     def __str__(self):
         return self.name
+
+    def can_move(self):
+        if self.facing == 'вправо':
+            for item in self.game.items:
+                if item.rect.x - 40 == self.item.rect.x and item.rect.y == self.item.rect.y:
+                    return False
+        elif self.facing == 'влево':
+            for item in self.game.items:
+                if item.rect.x + 40 == self.item.rect.x and item.rect.y == self.item.rect.y:
+                    return False
+        elif self.facing == 'вниз':
+            for item in self.game.items:
+                if item.rect.x == self.item.rect.x and item.rect.y - 40 == self.item.rect.y:
+                    return False
+        elif self.facing == 'вверх':
+            for item in self.game.items:
+                if item.rect.x == self.item.rect.x and item.rect.y + 40 == self.item.rect.y:
+                    return False
+        return True
 
 
 class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Бур')
         self.remove(self.game.storage)
+        self.item = Ore(game, x, y)
 
     def update(self):
         hits = pygame.sprite.spritecollide(self, self.game.ores, False)
@@ -99,9 +120,11 @@ class Mine(BuildObject):
             self.get_ore()
 
     def get_ore(self):
-        if pygame.time.get_ticks() - self.last < 10000:
+        if pygame.time.get_ticks() - self.last < 1000:
             return
         self.last = pygame.time.get_ticks()
+        if not self.can_move():
+            return
         ore = ItemIronOre(self.game, self.rect.x / 40, self.rect.y / 40)
         if self.facing == 'вправо':
             ore.move(SIDE, 0)
@@ -116,22 +139,24 @@ class Mine(BuildObject):
 class Conveyor(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing, 'Конвейер')
-        self.item = None
 
     def update(self):
         self.find_item()
         self.move_item()
-        self.move_player()
+        # self.move_player()
 
     def find_item(self):
         for item in self.game.items:
             if item.object == self:
                 self.item = item
+                break
 
     def move_item(self):
         if self.item is None:
             return
         if pygame.time.get_ticks() - self.item.last < 100:
+            return
+        if not self.can_move():
             return
         if self.facing == 'вправо':
             self.item.move(SIDE, 0)
@@ -143,26 +168,30 @@ class Conveyor(BuildObject):
             self.item.move(0, -SIDE)
         self.item = None
 
-    def move_player(self):
-        if pygame.time.get_ticks() - self.last < 100:
-            return
-        if not pygame.sprite.spritecollide(self, self.game.player, False):
-            return
-        for sprite in self.game.dynamic:
-            if self.facing == 'вправо':
-                sprite.rect.x -= SIDE
-            elif self.facing == 'влево':
-                sprite.rect.x += SIDE
-            elif self.facing == 'вниз':
-                sprite.rect.y -= SIDE
-            elif self.facing == 'вверх':
-                sprite.rect.y += SIDE
+
+    # def move_player(self):
+    #     for player in self.game.player:
+    #         if pygame.time.get_ticks() - player.last2 < 1000:
+    #             return
+    #         player.last2 = pygame.time.get_ticks()
+    #         if not pygame.sprite.spritecollide(self, self.game.player, False):
+    #             return
+    #         for sprite in self.game.dynamic:
+    #             if self.facing == 'вправо':
+    #                 sprite.rect.x -= SIDE
+    #             elif self.facing == 'влево':
+    #                 sprite.rect.x += SIDE
+    #             elif self.facing == 'вниз':
+    #                 sprite.rect.y -= SIDE
+    #             elif self.facing == 'вверх':
+    #                 sprite.rect.y += SIDE
 
 
 class PullConveyor(Conveyor):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, facing)
         self.image.blit(pygame.image.load(f"img/Вытягивающий_Конвейер_{facing}.png"), (0, 0))
+
 
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
@@ -196,7 +225,7 @@ class Lab(BuildObject):
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
-        self._layer = 4
+        self._layer = 5
         self.groups = self.game.all, self.game.player
         pygame.sprite.Sprite.__init__(self, self.groups)
 
@@ -210,8 +239,8 @@ class Player(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
-        #  * random.randint(-5, +5)  * random.randint(-5, +5)
         self.last = 0
+        # self.last2 = 0
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -259,7 +288,7 @@ class Button(pygame.sprite.Sprite):
 class Mouse(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
-        self._layer = 4
+        self._layer = 6
         self.groups = self.game.all, self.game.mouse
         pygame.sprite.Sprite.__init__(self, self.groups)
 
