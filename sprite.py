@@ -191,10 +191,14 @@ class PullConveyor(Conveyor):
         self.image.blit(pygame.image.load(f"img/Вытягивающий_Конвейер_{facing}.png"), (0, 0))
 
     def update(self):
+        self.pull_item()
+        super().update()
+
+    def pull_item(self):
+        previous_item = self.find_previous_item()
         self.find_item()
         if self.item is not None:
             return
-        previous_item = self.find_previous_item()
         if previous_item is None:
             return
         if self.facing == 'вправо':
@@ -205,7 +209,6 @@ class PullConveyor(Conveyor):
             previous_item.move(0, SIDE)
         elif self.facing == 'вверх':
             previous_item.move(0, -SIDE)
-        super().update()
 
     def find_previous_item(self):
         if self.facing == 'вправо':
