@@ -124,7 +124,7 @@ class Mine(BuildObject):
             self.get_ore()
 
     def get_ore(self):
-        if pygame.time.get_ticks() - self.last < 1000:
+        if pygame.time.get_ticks() - self.last < MINE_TIME:
             return
         self.last = pygame.time.get_ticks()
         if not self.can_move():
@@ -152,7 +152,7 @@ class Conveyor(BuildObject):
     def move_item(self):
         if self.item is None:
             return
-        if pygame.time.get_ticks() - self.item.last < 100:
+        if pygame.time.get_ticks() - self.item.last < CONVEYOR_TIME:
             return
         if not self.can_move():
             return
@@ -273,7 +273,7 @@ class Lab(BuildObject):
         self.find_item()
         if self.item is None:
             return
-        if pygame.time.get_ticks() - self.last < 1000:
+        if pygame.time.get_ticks() - self.last < LAB_TIME:
             return
         self.last = pygame.time.get_ticks()
         if isinstance(self.item, ItemIronOre):
@@ -306,7 +306,7 @@ class Furnaсe(BuildObject):
         self.find_item()
         if self.item is None:
             return
-        if pygame.time.get_ticks() - self.last < 1000:
+        if pygame.time.get_ticks() - self.last < FURNACE_TIME:
             return
         self.last = pygame.time.get_ticks()
         if isinstance(self.item, ItemIronOre):

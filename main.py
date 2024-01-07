@@ -112,7 +112,7 @@ class Game:
                 Ground(self, j, i)
 
         for kol in range(128):
-            self.create_field1(random.randint(0, 127), random.randint(0, 127))
+            self.create_field1(random.randint(0, 127), random.randint(0, 127), Ore)
 
         for sprite in self.all:
             sprite.rect.x -= 2560
@@ -123,12 +123,11 @@ class Game:
         Info(self)
         Player(self)
 
-    def create_field1(self, x, y):
-        Ore(self, x, y)
-        Ore(self, x + 1, y)
-        Ore(self, x - 1, y)
-        Ore(self, x, y + 1)
-        Ore(self, x, y - 1)
+    def create_field1(self, x, y, ore):
+        for i in range(random.randint(5, 10)):
+            for j in range(random.randint(5, 10)):
+                if random.random() > 0.5:
+                    ore(self, x + i, y + j)
 
 
 g = Game()

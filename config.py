@@ -11,6 +11,8 @@ GREEN = (0, 255, 0)
 
 PLAYER_SPEED = 40
 
-# melting_recipes = {
-#     ItemIronOre: IronPlate
-# }
+TIME = 100
+MINE_TIME = TIME * 10
+CONVEYOR_TIME = TIME * 1
+FURNACE_TIME = TIME * 10
+LAB_TIME = TIME * 10
