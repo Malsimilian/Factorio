@@ -114,8 +114,13 @@ class Game:
             for j in range(5):
                 Ground(self, j, i)
 
-        for kol in range(128):
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), Ore)
+        for kol in range(63):
+            self.create_field1(random.randint(0, 127), random.randint(0, 127), IronOre)
+            self.create_field1(random.randint(0, 127), random.randint(0, 127), CopperOre)
+        for ore1 in self.ores:
+            for ore2 in self.ores:
+                if ore1 != ore2 and ore1.rect == ore2.rect:
+                    ore2.kill()
 
         for sprite in self.all:
             sprite.rect.x -= 2560

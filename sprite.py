@@ -117,10 +117,16 @@ class Mine(BuildObject):
         super().__init__(game, x, y, facing, 'Бур')
         self.remove(self.game.storage)
         self.item = TechItem(game, x, y)
-
-    def update(self):
+        self.ore = None
         hits = pygame.sprite.spritecollide(self, self.game.ores, False)
         if hits:
+            if isinstance(hits[0], IronOre):
+                self.ore = ItemIronOre
+            elif isinstance(hits[0], CopperOre):
+                self.ore = ItemCopperOre
+
+    def update(self):
+        if self.ore is not None:
             self.get_ore()
 
     def get_ore(self):
@@ -129,7 +135,7 @@ class Mine(BuildObject):
         self.last = pygame.time.get_ticks()
         if not self.can_move():
             return
-        ore = ItemIronOre(self.game, self.rect.x / 40, self.rect.y / 40)
+        ore = self.ore(self.game, self.rect.x / 40, self.rect.y / 40)
         if self.facing == 'вправо':
             ore.move(SIDE, 0)
         elif self.facing == 'влево':
@@ -205,7 +211,7 @@ class PullConveyor(Conveyor):
         if previous_object is None:
             return
         elif isinstance(previous_object, Furnaсe):
-            if isinstance(previous_item, IronPlate):
+            if isinstance(previous_item, IronPlate) or isinstance(previous_item, CopperPlate):
                 if self.facing == 'вправо':
                     previous_item.move(SIDE, 0)
                 elif self.facing == 'влево':
@@ -284,6 +290,10 @@ class Lab(BuildObject):
             self.item.kill()
             self.game.exp += 10
             self.item = None
+        elif isinstance(self.item, CopperPlate):
+            self.item.kill()
+            self.game.exp += 10
+            self.item = None
 
 
 class AssemblyMachine(BuildObject):
@@ -312,6 +322,10 @@ class Furnaсe(BuildObject):
         if isinstance(self.item, ItemIronOre):
             self.item.kill()
             IronPlate(self.game, self.rect.x / 40, self.rect.y / 40)
+            self.item = None
+        elif isinstance(self.item, ItemCopperOre):
+            self.item.kill()
+            CopperPlate(self.game, self.rect.x / 40, self.rect.y / 40)
             self.item = None
 
 
@@ -429,14 +443,14 @@ class Ground(pygame.sprite.Sprite):
 
 
 class Ore(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, image):
         self.game = game
         self._layer = 2
         self.groups = self.game.all, self.game.dynamic, self.game.ores
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([40, 40])
-        self.image.blit(pygame.image.load("img/Руда_1.png"), (0, 0))
+        self.image.blit(pygame.image.load(f"img/{image}.png"), (0, 0))
         self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
@@ -444,8 +458,18 @@ class Ore(pygame.sprite.Sprite):
         self.rect.y = y * 40
 
 
+class IronOre(Ore):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Железная руда')
+
+
+class CopperOre(Ore):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Медная руда')
+
+
 class Item(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, image, layer=4):
+    def __init__(self, game, x, y, image, exp, layer=4):
         self.game = game
         self._layer = layer
         self.groups = self.game.all, self.game.dynamic, self.game.items
@@ -461,6 +485,7 @@ class Item(pygame.sprite.Sprite):
 
         self.object = None
         self.last = 0
+        self.exp = exp
 
     def update(self):
         self.find_object()
@@ -480,19 +505,29 @@ class Item(pygame.sprite.Sprite):
 
 class ItemIronOre(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Предмет железная руда')
+        super().__init__(game, x, y, 'Предмет железная руда', 1)
 
 
-class IronPalka(Item):
+class ItemCopperOre(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железная палка')
+        super().__init__(game, x, y, 'Предмет медная руда', 1)
+
+
+class IronStick(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Железная Прут', 100)
 
 
 class IronPlate(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железная пластина')
+        super().__init__(game, x, y, 'Железная пластина', 10)
 
 
 class TechItem(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Технический предмет', 0)
+        super().__init__(game, x, y, 'Технический предмет', 0, 0)
+
+
+class CopperPlate(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Медная пластина', 10)
