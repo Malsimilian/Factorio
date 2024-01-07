@@ -90,7 +90,7 @@ class Game:
         self.runnig = False
 
     def check_win(self):
-        if self.exp >= 100:
+        if self.exp >= WIN:
             self.is_win = True
         else:
             self.is_win = False
@@ -100,7 +100,10 @@ class Game:
         Mouse(self)
 
     def update_info(self, info=''):
-        self.info = self.info_build_object + f' {self.exp} ' + info
+        if self.is_win:
+            self.info = self.info_build_object + f' {self.exp} ' + info + 'WIN'
+        else:
+            self.info = self.info_build_object + f' {self.exp} ' + info
 
     def create_map(self):
         for sprite in self.all:
