@@ -545,3 +545,8 @@ class TechItem(Item):
 class CopperPlate(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Медная пластина', 10)
+
+
+class IronGeer(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Железная шестерня', 400)

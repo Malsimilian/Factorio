@@ -25,6 +25,12 @@ class Game:
         self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace')
         self.last_wheel = 200
 
+        self.receipt = IronStick
+        self.receipts = [IronStick, IronGeer]
+        self.info_receipt = 'IronStick'
+        self.info_receipts = ['IronStick', 'IronGeer']
+        self.last_wheel_receipt = 200
+
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
@@ -68,6 +74,8 @@ class Game:
                         self.mod_item_kill = False
                     else:
                         self.mod_item_kill = True
+                if event.key == pygame.K_g:
+                    self.change_receipt()
 
     def change_build_object(self):
         if pygame.time.get_ticks() - self.last_wheel >= 200:
@@ -85,6 +93,23 @@ class Game:
             else:
                 next = 0
             self.info_build_object = self.info_build_objects[next]
+
+    def change_receipt(self):
+        if pygame.time.get_ticks() - self.last_wheel_receipt >= 200:
+            self.last_wheel = pygame.time.get_ticks()
+            index = self.receipts.index(self.receipt)
+            if index != len(self.receipts) - 1:
+                next = index + 1
+            else:
+                next = 0
+            self.receipt = self.receipts[next]
+
+            index = self.info_receipts.index(self.info_receipt)
+            if index != len(self.info_receipts) - 1:
+                next = index + 1
+            else:
+                next = 0
+            self.info_receipt = self.info_receipts[next]
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -108,9 +133,9 @@ class Game:
 
     def update_info(self, info=''):
         if self.is_win:
-            self.info = self.info_build_object + f' {self.exp} ' + info + 'WIN'
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + info + 'WIN'
         else:
-            self.info = self.info_build_object + f' {self.exp} ' + info
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + info
 
     def create_map(self):
         for sprite in self.all:
