@@ -17,6 +17,7 @@ class Game:
         self.facing = "вправо"  # направление модулей
         self.exp = 0
         self.info = ''
+        self.mod_item_kill = False
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe)
@@ -61,6 +62,12 @@ class Game:
                 if pressed[1]:
                     self.change_build_object()
                 self.click = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    if self.mod_item_kill:
+                        self.mod_item_kill = False
+                    else:
+                        self.mod_item_kill = True
 
     def change_build_object(self):
         if pygame.time.get_ticks() - self.last_wheel >= 200:

@@ -208,7 +208,7 @@ class PullConveyor(Conveyor):
         if previous_item is None:
             return
         previous_object = self.find_previous_object()
-        if previous_object is None:
+        if previous_object is None or isinstance(previous_object, PullConveyor):
             return
         elif isinstance(previous_object, Furnaсe):
             if isinstance(previous_item, IronPlate) or isinstance(previous_item, CopperPlate):
@@ -329,6 +329,14 @@ class Furnaсe(BuildObject):
             self.item = None
 
 
+class Chest(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Chest')
+        self.image.blit(pygame.image.load(f"img/Железный сундук.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+        self.storage = []
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
@@ -413,6 +421,8 @@ class Mouse(pygame.sprite.Sprite):
             self.build()
         if self.game.left_click:
             self.kill_object()
+            if self.game.mod_item_kill:
+                self.kill_item()
 
     def build(self):
         object = self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
@@ -425,6 +435,10 @@ class Mouse(pygame.sprite.Sprite):
                 object.tech_item.kill()
                 object.kill()
 
+    def kill_item(self):
+        for item in self.game.items:
+            if item.rect.x // 40 == self.rect.x // 40 and item.rect.y // 40 == self.rect.y // 40:
+                item.kill()
 
 class Ground(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
