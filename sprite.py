@@ -424,7 +424,7 @@ class Player(pygame.sprite.Sprite):
         self.image.blit(image_to_load, (0, 0))
 
         self.rect = self.image.get_rect()
-        self.rect.center = (WIN_WIDTH // 2, WIN_HEIGHT // 2)
+        self.rect.center = (WIN_WIDTH // 2 + 20, WIN_HEIGHT // 2 + 20)
         self.last = 0
         # self.last2 = 0
 
