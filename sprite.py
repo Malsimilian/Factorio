@@ -87,6 +87,7 @@ class BuildObject(pygame.sprite.Sprite):
         self.tech_item = TechItem(game, x, y)
         self.last_electricity = 0
         self.time = time
+        self.entry_allowed = True
 
     def update(self):
         self.electricity()
@@ -124,6 +125,9 @@ class BuildObject(pygame.sprite.Sprite):
                 self.item = item
                 break
 
+    def prekill(self):
+        pass
+
 
 class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
@@ -137,6 +141,8 @@ class Mine(BuildObject):
                 self.ore = ItemIronOre
             elif isinstance(hits[0], CopperOre):
                 self.ore = ItemCopperOre
+            elif isinstance(hits[0], Coal):
+                self.ore = ItemCoal
 
     def update(self):
         if not self.can_work():
@@ -200,7 +206,29 @@ class Conveyor(BuildObject):
             return False
         if self.game.electricity < ELECTRICITY:
             return False
+        if self.find_object() is not None:
+            if not self.find_object().entry_allowed:
+                return False
         return True
+
+    def find_object(self):
+        if self.facing == 'вправо':
+            for object in self.game.builds:
+                if object.rect.x - 40 == self.rect.x and object.rect.y == self.rect.y:
+                    return object
+        elif self.facing == 'влево':
+            for object in self.game.builds:
+                if object.rect.x + 40 == self.rect.x and object.rect.y == self.rect.y:
+                    return object
+        elif self.facing == 'вниз':
+            for object in self.game.builds:
+                if object.rect.x == self.rect.x and object.rect.y - 40 == self.rect.y:
+                    return object
+        elif self.facing == 'вверх':
+            for object in self.game.builds:
+                if object.rect.x == self.rect.x and object.rect.y + 40 == self.rect.y:
+                    return object
+        return None
 
     # def move_player(self):
     #     for player in self.game.player:
@@ -241,23 +269,23 @@ class PullConveyor(Conveyor):
             return
         elif isinstance(previous_object, Furnaсe):
             if isinstance(previous_item, IronPlate) or isinstance(previous_item, CopperPlate):
-                if self.facing == 'вправо':
-                    previous_item.move(SIDE, 0)
-                elif self.facing == 'влево':
-                    previous_item.move(-SIDE, 0)
-                elif self.facing == 'вниз':
-                    previous_item.move(0, SIDE)
-                elif self.facing == 'вверх':
-                    previous_item.move(0, -SIDE)
+                self.pull_move(previous_item)
+        elif isinstance(previous_object, Foundry):
+            if isinstance(previous_item, Steel):
+                self.pull_move(previous_item)
         elif isinstance(previous_object, Conveyor):
-            if self.facing == 'вправо':
-                previous_item.move(SIDE, 0)
-            elif self.facing == 'влево':
-                previous_item.move(-SIDE, 0)
-            elif self.facing == 'вниз':
-                previous_item.move(0, SIDE)
-            elif self.facing == 'вверх':
-                previous_item.move(0, -SIDE)
+            self.pull_move(previous_item)
+
+
+    def pull_move(self, previous_item):
+        if self.facing == 'вправо':
+            previous_item.move(SIDE, 0)
+        elif self.facing == 'влево':
+            previous_item.move(-SIDE, 0)
+        elif self.facing == 'вниз':
+            previous_item.move(0, SIDE)
+        elif self.facing == 'вверх':
+            previous_item.move(0, -SIDE)
 
     def find_previous_object(self):
         if self.facing == 'вправо':
@@ -408,6 +436,94 @@ class Chest(BuildObject):
         self.storage = []
 
 
+class Foundry(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Литейная', FOUNDRY_TIME)
+        self.image.blit(pygame.image.load(f"img/Литейная.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+        self.iron = 0
+        self.coal = 0
+
+    def update(self):
+        if not self.can_work():
+            return
+        super().update()
+        self.alloy()
+        self.trash()
+
+    def trash(self):
+        if self.iron >= 5 and self.coal >= 5:
+            self.entry_allowed = False
+        else:
+            self.entry_allowed = True
+        if self.iron >= 100:
+            self.kill()
+        if self.coal >= 100:
+            self.kill()
+
+    def can_work(self):
+        self.get_item()
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        if self.iron < 1 or self.coal < 1:
+            return False
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
+
+    def get_item(self):
+        self.find_item()
+        if self.item is None:
+            return
+        elif isinstance(self.item, IronPlate):
+            self.iron += 1
+            self.item.kill()
+        elif isinstance(self.item, ItemCoal):
+            self.coal += 1
+            self.item.kill()
+
+    def alloy(self):
+        self.iron -= 1
+        self.coal -= 1
+        Steel(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def prekill(self):
+        for i in range(self.iron):
+            IronPlate(self.game, self.rect.x // 40, self.rect.y // 40)
+        for i in range(self.coal):
+            ItemCoal(self.game, self.rect.x // 40, self.rect.y // 40)
+        print('я не готов умирать')
+
+
+class TrashBox(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Мусорка', 0)
+        self.image.blit(pygame.image.load(f"img/Мусорка.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        if not self.can_work():
+            return
+        super().update()
+        self.trash()
+
+    def trash(self):
+        self.item.kill()
+        self.item = None
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.find_item()
+        if self.item is None:
+            return
+        self.last = pygame.time.get_ticks()
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
@@ -503,6 +619,7 @@ class Mouse(pygame.sprite.Sprite):
     def kill_object(self):
         for object in self.game.builds:
             if object.rect.x // 40 == self.rect.x // 40 and object.rect.y // 40 == self.rect.y // 40:
+                object.prekill()
                 object.tech_item.kill()
                 object.kill()
 
@@ -552,6 +669,11 @@ class IronOre(Ore):
 class CopperOre(Ore):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Медная руда')
+
+
+class Coal(Ore):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Уголь')
 
 
 class Item(pygame.sprite.Sprite):
@@ -622,3 +744,13 @@ class CopperPlate(Item):
 class IronGeer(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Железная шестерня', 400)
+
+
+class ItemCoal(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Предмет уголь', 2)
+
+
+class Steel(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Сталь', 2)

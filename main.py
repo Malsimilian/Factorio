@@ -21,9 +21,11 @@ class Game:
         self.electricity = 0
 
         self.build_object = Conveyor
-        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe, SolarPanel)
+        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe, SolarPanel, Foundry,
+                              TrashBox)
         self.info_build_object = 'Conveyor'
-        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace', 'SolarPanel')
+        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace',
+                                   'SolarPanel', 'Foundry', 'TrashBox')
         self.last_wheel = 200
 
         self.receipt = IronStick
@@ -147,9 +149,10 @@ class Game:
             for j in range(5):
                 Ground(self, j, i)
 
-        for kol in range(63):
+        for kol in range(31):
             self.create_field1(random.randint(0, 127), random.randint(0, 127), IronOre)
             self.create_field1(random.randint(0, 127), random.randint(0, 127), CopperOre)
+            self.create_field1(random.randint(0, 127), random.randint(0, 127), Coal)
         for ore1 in self.ores:
             for ore2 in self.ores:
                 if ore1 != ore2 and ore1.rect == ore2.rect:
