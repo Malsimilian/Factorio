@@ -18,11 +18,12 @@ class Game:
         self.exp = 0
         self.info = ''
         self.mod_item_kill = False
+        self.electricity = 0
 
         self.build_object = Conveyor
-        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe)
+        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe, SolarPanel)
         self.info_build_object = 'Conveyor'
-        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace')
+        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace', 'SolarPanel')
         self.last_wheel = 200
 
         self.receipt = IronStick
@@ -133,9 +134,9 @@ class Game:
 
     def update_info(self, info=''):
         if self.is_win:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + info + 'WIN'
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + ' WIN'
         else:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + info
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity)
 
     def create_map(self):
         for sprite in self.all:

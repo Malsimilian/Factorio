@@ -63,7 +63,7 @@ class Facing(Interface):
 
 
 class BuildObject(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, facing, name):
+    def __init__(self, game, x, y, facing, name, time):
         self.game = game
         self._layer = 2
         self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds
@@ -85,6 +85,19 @@ class BuildObject(pygame.sprite.Sprite):
         self.facing = facing
         self.item = None
         self.tech_item = TechItem(game, x, y)
+        self.last_electricity = 0
+        self.time = time
+
+    def update(self):
+        self.electricity()
+
+    def electricity(self):
+        if pygame.time.get_ticks() - self.last_electricity < self.time:
+            return
+        if isinstance(self, SolarPanel):
+            return
+        self.last_electricity = pygame.time.get_ticks()
+        self.game.electricity -= ELECTRICITY
 
     def can_move(self):
         if self.facing == 'вправо':
@@ -114,7 +127,7 @@ class BuildObject(pygame.sprite.Sprite):
 
 class Mine(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, facing, 'Бур')
+        super().__init__(game, x, y, facing, 'Бур', MINE_TIME)
         self.remove(self.game.storage)
         self.item = TechItem(game, x, y)
         self.ore = None
@@ -126,15 +139,12 @@ class Mine(BuildObject):
                 self.ore = ItemCopperOre
 
     def update(self):
-        if self.ore is not None:
-            self.get_ore()
+        if not self.can_work():
+            return
+        super().update()
+        self.get_ore()
 
     def get_ore(self):
-        if pygame.time.get_ticks() - self.last < MINE_TIME:
-            return
-        self.last = pygame.time.get_ticks()
-        if not self.can_move():
-            return
         ore = self.ore(self.game, self.rect.x / 40, self.rect.y / 40)
         if self.facing == 'вправо':
             ore.move(SIDE, 0)
@@ -145,23 +155,31 @@ class Mine(BuildObject):
         elif self.facing == 'вверх':
             ore.move(0, -SIDE)
 
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        if not self.can_move():
+            return False
+        if self.ore is None:
+            return False
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
+
 
 class Conveyor(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, facing, 'Конвейер')
+        super().__init__(game, x, y, facing, 'Конвейер', CONVEYOR_TIME)
 
     def update(self):
-        self.find_item()
+        if not self.can_work():
+            return
+        super().update()
         self.move_item()
         # self.move_player()
 
     def move_item(self):
-        if self.item is None:
-            return
-        if pygame.time.get_ticks() - self.item.last < CONVEYOR_TIME:
-            return
-        if not self.can_move():
-            return
         if self.facing == 'вправо':
             self.item.move(SIDE, 0)
         elif self.facing == 'влево':
@@ -172,6 +190,17 @@ class Conveyor(BuildObject):
             self.item.move(0, -SIDE)
         self.item = None
 
+    def can_work(self):
+        self.find_item()
+        if self.item is None:
+            return False
+        if pygame.time.get_ticks() - self.item.last < self.time:
+            return False
+        if not self.can_move():
+            return False
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
 
     # def move_player(self):
     #     for player in self.game.player:
@@ -271,17 +300,17 @@ class PullConveyor(Conveyor):
 
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Лаборатория')
+        super().__init__(game, x, y, None, 'Лаборатория', LAB_TIME)
         self.image.blit(pygame.image.load(f"img/Лаборатория.png"), (0, 0))
         self.image.set_colorkey(BLACK)
 
     def update(self):
-        self.find_item()
-        if self.item is None:
+        if not self.can_work():
             return
-        if pygame.time.get_ticks() - self.last < LAB_TIME:
-            return
-        self.last = pygame.time.get_ticks()
+        super().update()
+        self.research()
+
+    def research(self):
         if isinstance(self.item, ItemIronOre):
             self.item.kill()
             self.game.exp += 1
@@ -295,30 +324,42 @@ class Lab(BuildObject):
             self.game.exp += 10
             self.item = None
 
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        self.find_item()
+        if self.item is None:
+            return False
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
+
 
 class AssemblyMachine(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Assembling_machine')
+        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
         self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
         self.image.set_colorkey(BLACK)
 
     def update(self):
+        super().update()
         self.find_item()
 
 
 class Furnaсe(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Furnace')
+        super().__init__(game, x, y, None, 'Furnace', FURNACE_TIME)
         self.image.blit(pygame.image.load(f"img/Furnace.png"), (0, 0))
         self.image.set_colorkey(BLACK)
 
     def update(self):
-        self.find_item()
-        if self.item is None:
+        if not self.can_work():
             return
-        if pygame.time.get_ticks() - self.last < FURNACE_TIME:
-            return
-        self.last = pygame.time.get_ticks()
+        super().update()
+        self.melt()
+
+    def melt(self):
         if isinstance(self.item, ItemIronOre):
             self.item.kill()
             IronPlate(self.game, self.rect.x / 40, self.rect.y / 40)
@@ -327,6 +368,36 @@ class Furnaсe(BuildObject):
             self.item.kill()
             CopperPlate(self.game, self.rect.x / 40, self.rect.y / 40)
             self.item = None
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        self.find_item()
+        if self.item is None:
+            return False
+        if self.game.electricity < ELECTRICITY:
+            return False
+        return True
+
+
+class SolarPanel(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Солнечная панель', SOLAR_PANEL_TIME)
+        self.image.blit(pygame.image.load(f"img/Солнчная панель.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        if not self.can_work():
+            return
+        super().update()
+        self.game.electricity += 100
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        return True
 
 
 class Chest(BuildObject):
@@ -439,6 +510,7 @@ class Mouse(pygame.sprite.Sprite):
         for item in self.game.items:
             if item.rect.x // 40 == self.rect.x // 40 and item.rect.y // 40 == self.rect.y // 40:
                 item.kill()
+
 
 class Ground(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
