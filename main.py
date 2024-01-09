@@ -20,13 +20,16 @@ class Game:
         self.info2 = ''
         self.mod_item_kill = False
         self.electricity = 0
+        self.facings = ["вправо", "вниз", "влево", "вверх"]
+        self.facing_id = 0
 
         self.build_object = Conveyor
         self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe, SolarPanel, Foundry,
-                              TrashBox)
+                              TrashBox, Level1AssemblyMachine, Level2AssemblyMachine, LabAssemblyMachine)
         self.info_build_object = 'Conveyor'
         self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace',
-                                   'SolarPanel', 'Foundry', 'TrashBox')
+                                   'SolarPanel', 'Foundry', 'TrashBox', 'Level1AssemblyMachine',
+                                   'Level2AssemblyMachine', 'LabAssemblyMachine')
         self.last_wheel = 200
 
         self.receipt = IronStick
@@ -34,6 +37,9 @@ class Game:
         self.info_receipt = 'IronStick'
         self.info_receipts = ['IronStick', 'IronGeer']
         self.last_wheel_receipt = 200
+
+        self.right_click = False
+        self.left_click = False
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
@@ -57,29 +63,68 @@ class Game:
         pygame.display.update()
 
     def events(self):
-        self.click = False
-        self.right_click = False
-        self.left_click = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.runnig = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pressed = pygame.mouse.get_pressed()
-                if pressed[2]:
-                    self.right_click = True
-                if pressed[0]:
-                    self.left_click = True
-                if pressed[1]:
-                    self.change_build_object()
-                self.click = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_f:
-                    if self.mod_item_kill:
-                        self.mod_item_kill = False
-                    else:
-                        self.mod_item_kill = True
-                if event.key == pygame.K_g:
-                    self.change_receipt()
+                self.key_event_react(event)
+
+    def key_event_react(self, event):
+        if event.key == pygame.K_f:
+            if self.mod_item_kill:
+                self.mod_item_kill = False
+            else:
+                self.mod_item_kill = True
+        if event.key == pygame.K_g:
+            self.change_receipt()
+        if event.key == pygame.K_1:
+            self.build_object = Conveyor
+            self.info_build_object = 'Conveyor'
+        if event.key == pygame.K_2:
+            self.build_object = PullConveyor
+            self.info_build_object = 'PullConveyor'
+        if event.key == pygame.K_3:
+            self.build_object = Mine
+            self.info_build_object = 'Mine'
+        if event.key == pygame.K_4:
+            self.build_object = Furnaсe
+            self.info_build_object = 'Furnaсe'
+        if event.key == pygame.K_5:
+            self.build_object = Foundry
+            self.info_build_object = 'Foundry'
+        if event.key == pygame.K_6:
+            self.build_object = Level1AssemblyMachine
+            self.info_build_object = 'Level1AssemblyMachine'
+        if event.key == pygame.K_7:
+            self.build_object = Level2AssemblyMachine
+            self.info_build_object = 'Level2AssemblyMachine'
+        if event.key == pygame.K_8:
+            self.build_object = LabAssemblyMachine
+            self.info_build_object = 'LabAssemblyMachine'
+        if event.key == pygame.K_9:
+            self.build_object = Lab
+            self.info_build_object = 'Lab'
+        if event.key == pygame.K_0:
+            self.build_object = TrashBox
+            self.info_build_object = 'TrashBox'
+        if event.key == pygame.K_e:
+            self.rotate_clockwise()
+        if event.key == pygame.K_q:
+            self.rotate_anticlockwise()
+        if event.key == pygame.K_r:
+            self.change_build_object()
+
+    def rotate_clockwise(self):
+        self.facing_id += 1
+        if self.facing_id >= 4:
+            self.facing_id = 0
+        self.facing = self.facings[self.facing_id]
+
+    def rotate_anticlockwise(self):
+        self.facing_id -= 1
+        if self.facing_id <= -1:
+            self.facing_id = 3
+        self.facing = self.facings[self.facing_id]
 
     def change_build_object(self):
         if pygame.time.get_ticks() - self.last_wheel >= 200:
@@ -90,12 +135,6 @@ class Game:
             else:
                 next = 0
             self.build_object = self.build_objects[next]
-
-            index = self.info_build_objects.index(self.info_build_object)
-            if index != len(self.info_build_objects) - 1:
-                next = index + 1
-            else:
-                next = 0
             self.info_build_object = self.info_build_objects[next]
 
     def change_receipt(self):
@@ -107,12 +146,6 @@ class Game:
             else:
                 next = 0
             self.receipt = self.receipts[next]
-
-            index = self.info_receipts.index(self.info_receipt)
-            if index != len(self.info_receipts) - 1:
-                next = index + 1
-            else:
-                next = 0
             self.info_receipt = self.info_receipts[next]
 
     def main(self): #игровой цикл
@@ -122,8 +155,19 @@ class Game:
             self.update()
             self.check_win()
             self.update_info()
+            self.react_mouse_click()
 
         self.runnig = False
+
+    def react_mouse_click(self):
+        self.right_click = False
+        self.left_click = False
+        pressed = pygame.mouse.get_pressed()
+        if pressed[2]:
+            self.right_click = True
+        if pressed[0]:
+            self.left_click = True
+        self.click = True
 
     def check_win(self):
         if self.exp >= WIN:

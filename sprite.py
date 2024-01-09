@@ -44,22 +44,8 @@ class Facing(Interface):
         self.rect.x = WIN_WIDTH - 80
         self.rect.y = 0
 
-        self.ind = 0
-        self.facings = ["вправо", "вниз", "влево", "вверх"]
-
-        self.last = 500
-
     def update(self):
-        if pygame.time.get_ticks() - self.last >= 200:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
-                self.last = pygame.time.get_ticks()
-                self.ind += 1
-                if self.ind == 4:
-                    self.ind = 0
-
-                self.game.facing = self.facings[self.ind]
-                self.image.blit(pygame.image.load("img/Направление_" + self.facings[self.ind] + ".png"), (0, 0))
+        self.image.blit(pygame.image.load("img/Направление_" + self.game.facing + ".png"), (0, 0))
 
 
 class BuildObject(pygame.sprite.Sprite):
@@ -375,6 +361,39 @@ class Lab(BuildObject):
 
 
 class AssemblyMachine(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
+        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        super().update()
+        self.find_item()
+
+
+class Level1AssemblyMachine(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
+        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        super().update()
+        self.find_item()
+
+
+class Level2AssemblyMachine(BuildObject):
+    def __init__(self, game, x, y, facing):
+        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
+        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
+
+    def update(self):
+        super().update()
+        self.find_item()
+
+
+class LabAssemblyMachine(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
         self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
