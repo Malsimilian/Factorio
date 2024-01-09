@@ -209,6 +209,16 @@ class Conveyor(BuildObject):
         if self.find_object() is not None:
             if not self.find_object().entry_allowed:
                 return False
+            if isinstance(self.find_object(), Foundry):
+                if not self.can_move_to_foundry():
+                    return False
+        return True
+
+    def can_move_to_foundry(self):
+        if not self.find_object().iron_entry_allowed and isinstance(self.item, IronPlate):
+            return False
+        if not self.find_object().coal_entry_allowed and isinstance(self.item, ItemCoal):
+            return False
         return True
 
     def find_object(self):
@@ -441,25 +451,34 @@ class Foundry(BuildObject):
         super().__init__(game, x, y, None, 'Литейная', FOUNDRY_TIME)
         self.image.blit(pygame.image.load(f"img/Литейная.png"), (0, 0))
         self.image.set_colorkey(BLACK)
+
         self.iron = 0
         self.coal = 0
 
+        self.iron_entry_allowed = True
+        self.coal_entry_allowed = True
+
     def update(self):
+        self.trash()
+        self.game.info2 = ' ' + str(self.iron) + ' ' + str(self.coal)
         if not self.can_work():
             return
         super().update()
         self.alloy()
-        self.trash()
 
     def trash(self):
-        if self.iron >= 5 and self.coal >= 5:
+        if self.iron >= 4 and self.coal >= 4:
             self.entry_allowed = False
         else:
             self.entry_allowed = True
-        if self.iron >= 100:
-            self.kill()
-        if self.coal >= 100:
-            self.kill()
+        if self.iron >= 4:
+            self.iron_entry_allowed = False
+        else:
+            self.iron_entry_allowed = True
+        if self.coal >= 4:
+            self.coal_entry_allowed = False
+        else:
+            self.coal_entry_allowed = True
 
     def can_work(self):
         self.get_item()
@@ -482,6 +501,7 @@ class Foundry(BuildObject):
         elif isinstance(self.item, ItemCoal):
             self.coal += 1
             self.item.kill()
+        self.item = None
 
     def alloy(self):
         self.iron -= 1

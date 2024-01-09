@@ -17,6 +17,7 @@ class Game:
         self.facing = "вправо"  # направление модулей
         self.exp = 0
         self.info = ''
+        self.info2 = ''
         self.mod_item_kill = False
         self.electricity = 0
 
@@ -134,11 +135,11 @@ class Game:
         Button(self, 500, 500, self.create_map)
         Mouse(self)
 
-    def update_info(self, info=''):
+    def update_info(self):
         if self.is_win:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + ' WIN'
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + ' WIN' + self.info2
         else:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity)
+            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + self.info2
 
     def create_map(self):
         for sprite in self.all:
