@@ -1,4 +1,5 @@
 import sys
+import random
 from sprite import *
 from config import *
 
