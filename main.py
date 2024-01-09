@@ -23,12 +23,11 @@ class Game:
         self.facing_id = 0
 
         self.build_object = Conveyor
-        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, AssemblyMachine, Furnaсe, SolarPanel, Foundry,
+        self.build_objects = (Conveyor, Mine, Lab, PullConveyor, Furnaсe, SolarPanel, Foundry,
                               TrashBox, Level1AssemblyMachine, Level2AssemblyMachine, LabAssemblyMachine)
         self.info_build_object = 'Conveyor'
-        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'AssemblyMachine', 'Furnace',
-                                   'SolarPanel', 'Foundry', 'TrashBox', 'Level1AssemblyMachine',
-                                   'Level2AssemblyMachine', 'LabAssemblyMachine')
+        self.info_build_objects = ('Conveyor', 'Mine', 'Lab', 'PullConveyor', 'Furnace', 'SolarPanel', 'Foundry',
+                                   'TrashBox', 'Level1AssemblyMachine', 'Level2AssemblyMachine', 'LabAssemblyMachine')
         self.last_wheel = 200
 
         self.receipt = IronStick

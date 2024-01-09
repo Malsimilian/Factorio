@@ -59,7 +59,9 @@ class BuildObject(pygame.sprite.Sprite):
         self.image = pygame.Surface([SIDE, SIDE])
         if facing is not None:
             self.image.blit(pygame.image.load(f"img/{name}_{facing}.png"), (0, 0))
-            self.image.set_colorkey(BLACK)
+        else:
+            self.image.blit(pygame.image.load(f"img/{name}.png"), (0, 0))
+        self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
         self.rect.x = x * SIDE
@@ -325,8 +327,6 @@ class PullConveyor(Conveyor):
 class Lab(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Лаборатория', LAB_TIME)
-        self.image.blit(pygame.image.load(f"img/Лаборатория.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
 
     def update(self):
         if not self.can_work():
@@ -361,43 +361,35 @@ class Lab(BuildObject):
 
 
 class AssemblyMachine(BuildObject):
-    def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
-        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
+    def __init__(self, game, x, y, name, time):
+        super().__init__(game, x, y, None, name, time)
 
     def update(self):
         super().update()
         self.find_item()
 
 
-class Level1AssemblyMachine(BuildObject):
+class Level1AssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
-        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
+        super().__init__(game, x, y, 'Level1_Assembling_machine', ASSEMBLY_MACHINE_TIME)
 
     def update(self):
         super().update()
         self.find_item()
 
 
-class Level2AssemblyMachine(BuildObject):
+class Level2AssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
-        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
+        super().__init__(game, x, y, 'Level2_Assembling_machine', ASSEMBLY_MACHINE_TIME)
 
     def update(self):
         super().update()
         self.find_item()
 
 
-class LabAssemblyMachine(BuildObject):
+class LabAssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Assembling_machine', ASSEMBLY_MACHINE_TIME)
-        self.image.blit(pygame.image.load(f"img/Assembling_machine.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
+        super().__init__(game, x, y, 'Lab_Assembling_machine', ASSEMBLY_MACHINE_TIME)
 
     def update(self):
         super().update()
@@ -407,8 +399,6 @@ class LabAssemblyMachine(BuildObject):
 class Furnaсe(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Furnace', FURNACE_TIME)
-        self.image.blit(pygame.image.load(f"img/Furnace.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
 
     def update(self):
         if not self.can_work():
@@ -441,8 +431,6 @@ class Furnaсe(BuildObject):
 class SolarPanel(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Солнечная панель', SOLAR_PANEL_TIME)
-        self.image.blit(pygame.image.load(f"img/Солнчная панель.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
 
     def update(self):
         if not self.can_work():
@@ -459,17 +447,13 @@ class SolarPanel(BuildObject):
 
 class Chest(BuildObject):
     def __init__(self, game, x, y, facing):
-        super().__init__(game, x, y, None, 'Chest')
-        self.image.blit(pygame.image.load(f"img/Железный сундук.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
+        super().__init__(game, x, y, None, 'Chest', 0)
         self.storage = []
 
 
 class Foundry(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Литейная', FOUNDRY_TIME)
-        self.image.blit(pygame.image.load(f"img/Литейная.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
 
         self.iron = 0
         self.coal = 0
@@ -538,8 +522,6 @@ class Foundry(BuildObject):
 class TrashBox(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Мусорка', 0)
-        self.image.blit(pygame.image.load(f"img/Мусорка.png"), (0, 0))
-        self.image.set_colorkey(BLACK)
 
     def update(self):
         if not self.can_work():
