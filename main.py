@@ -1,6 +1,4 @@
-import pygame
 import sys
-import random
 from sprite import *
 from config import *
 
