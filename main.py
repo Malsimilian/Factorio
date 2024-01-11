@@ -1,5 +1,8 @@
 import sys
 import random
+
+import pygame
+
 from sprite import *
 from config import *
 
@@ -30,25 +33,21 @@ class Game:
                                    'TrashBox', 'Level1AssemblyMachine', 'Level2AssemblyMachine', 'LabAssemblyMachine')
         self.last_wheel = 200
 
-        self.receipt = IronStick
-        self.receipts = [IronStick, IronGeer]
-        self.info_receipt = 'IronStick'
-        self.info_receipts = ['IronStick', 'IronGeer']
-        self.last_wheel_receipt = 200
-
         self.right_click = False
         self.left_click = False
+
+        self.gamemode = 'creative'
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
-        self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
         self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем
         self.ores = pygame.sprite.LayeredUpdates()
         self.builds = pygame.sprite.LayeredUpdates()  # для всех построек
         self.interface = pygame.sprite.LayeredUpdates()  # для всего интерфейса
         self.items = pygame.sprite.LayeredUpdates()  # для всех предметов
         self.player = pygame.sprite.LayeredUpdates()
+        self.assemblers = pygame.sprite.LayeredUpdates()
 
     def update(self):
         self.all.update()
@@ -136,15 +135,13 @@ class Game:
             self.info_build_object = self.info_build_objects[next]
 
     def change_receipt(self):
-        if pygame.time.get_ticks() - self.last_wheel_receipt >= 200:
-            self.last_wheel = pygame.time.get_ticks()
-            index = self.receipts.index(self.receipt)
-            if index != len(self.receipts) - 1:
-                next = index + 1
-            else:
-                next = 0
-            self.receipt = self.receipts[next]
-            self.info_receipt = self.info_receipts[next]
+        assemblers = pygame.sprite.spritecollide(self.mouse, self.assemblers, False)
+        if len(assemblers) == 0:
+            return
+        assembler = assemblers[0]
+        assembler.change_receipt()
+
+
 
     def main(self): #игровой цикл
         while self.runnig:
@@ -179,17 +176,17 @@ class Game:
 
     def update_info(self):
         if self.is_win:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + ' WIN' + self.info2
+            self.info = self.info_build_object + f' {self.exp} ' + str(self.electricity) + ' WIN' + self.info2
         else:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + self.info2
+            self.info = self.info_build_object + f' {self.exp} ' + str(self.electricity) + self.info2
 
     def create_map(self):
         for sprite in self.all:
             sprite.kill()
 
-        Mouse(self)
-        for i in range(5):
-            for j in range(5):
+        self.mouse = Mouse(self)
+        for i in range(2, 5):
+            for j in range(2, 5):
                 Ground(self, j, i)
 
         for kol in range(31):

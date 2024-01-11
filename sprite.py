@@ -52,7 +52,10 @@ class BuildObject(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, name, time):
         self.game = game
         self._layer = 2
-        self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds
+        if name == 'Level1_Assembling_machine':
+            self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds, self.game.assemblers
+        else:
+            self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds
 
         super().__init__(self.groups)
 
@@ -171,7 +174,6 @@ class Conveyor(BuildObject):
             return
         super().update()
         self.move_item()
-        # self.move_player()
 
     def move_item(self):
         if self.facing == 'вправо':
@@ -200,12 +202,28 @@ class Conveyor(BuildObject):
             if isinstance(self.find_object(), Foundry):
                 if not self.can_move_to_foundry():
                     return False
+            if isinstance(self.find_object(), Level1AssemblyMachine):
+                if not self.can_move_to_assembler1():
+                    return False
         return True
 
     def can_move_to_foundry(self):
         if not self.find_object().iron_entry_allowed and isinstance(self.item, IronPlate):
             return False
         if not self.find_object().coal_entry_allowed and isinstance(self.item, ItemCoal):
+            return False
+        return True
+
+    def can_move_to_assembler1(self):
+        if not self.find_object().entry_iron and isinstance(self.item, IronPlate):
+            return False
+        if not self.find_object().entry_copper and isinstance(self.item, CopperPlate):
+            return False
+        if not self.find_object().entry_geer and isinstance(self.item, IronGeer):
+            return False
+        if not self.find_object().entry_stick and isinstance(self.item, IronStick):
+            return False
+        if not self.find_object().entry_cable and isinstance(self.item, CopperCable):
             return False
         return True
 
@@ -227,23 +245,6 @@ class Conveyor(BuildObject):
                 if object.rect.x == self.rect.x and object.rect.y + 40 == self.rect.y:
                     return object
         return None
-
-    # def move_player(self):
-    #     for player in self.game.player:
-    #         if pygame.time.get_ticks() - player.last2 < 1000:
-    #             return
-    #         player.last2 = pygame.time.get_ticks()
-    #         if not pygame.sprite.spritecollide(self, self.game.player, False):
-    #             return
-    #         for sprite in self.game.dynamic:
-    #             if self.facing == 'вправо':
-    #                 sprite.rect.x -= SIDE
-    #             elif self.facing == 'влево':
-    #                 sprite.rect.x += SIDE
-    #             elif self.facing == 'вниз':
-    #                 sprite.rect.y -= SIDE
-    #             elif self.facing == 'вверх':
-    #                 sprite.rect.y += SIDE
 
 
 class PullConveyor(Conveyor):
@@ -271,9 +272,16 @@ class PullConveyor(Conveyor):
         elif isinstance(previous_object, Foundry):
             if isinstance(previous_item, Steel):
                 self.pull_move(previous_item)
+        elif isinstance(previous_object, Level1AssemblyMachine):
+            if isinstance(previous_item, LabPocket1Part1) or isinstance(previous_item, Chip):
+                self.pull_move(previous_item)
+            if isinstance(previous_item, CopperCable) and previous_object.can_pull_cable:
+                self.pull_move(previous_item)
+            if (isinstance(previous_item, IronGeer) or isinstance(previous_item, IronStick)) and \
+                previous_object.can_pull_geer_or_stick:
+                self.pull_move(previous_item)
         elif isinstance(previous_object, Conveyor):
             self.pull_move(previous_item)
-
 
     def pull_move(self, previous_item):
         if self.facing == 'вправо':
@@ -363,19 +371,245 @@ class Lab(BuildObject):
 class AssemblyMachine(BuildObject):
     def __init__(self, game, x, y, name, time):
         super().__init__(game, x, y, None, name, time)
+        self.receipt = None
+        self.receipts = []
 
     def update(self):
         super().update()
-        self.find_item()
+
+    def change_receipt(self):
+        index = self.receipts.index(self.receipt)
+        if index != len(self.receipts) - 1:
+            next = index + 1
+        else:
+            next = 0
+        self.receipt = self.receipts[next]
+        print('рецепт успешно изменен')
 
 
 class Level1AssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, 'Level1_Assembling_machine', ASSEMBLY_MACHINE_TIME)
+        self.receipt = 'IronStick'
+        self.receipts = ['IronStick', 'IronGeer', 'CopperCable', 'LabPocket1Part1', 'Chip']
+
+        self.iron = 0
+        self.copper = 0
+        self.geer = 0
+        self.stick = 0
+        self.cable = 0
+        self.max_iron = 0
+        self.max_copper = 0
+        self.max_geer = 0
+        self.max_stick = 0
+        self.max_cable = 0
+
+        self.can_pull_cable = True
+        self.can_delete_cable = False
+
+        self.can_pull_geer_or_stick = True
+        self.can_delete_geer_or_stick = False
+
+        self.entry_iron = False
+        self.entry_copper = False
+        self.entry_geer = False
+        self.entry_stick = False
+        self.entry_cable = False
 
     def update(self):
+        if self.receipt == 'Chip':
+            print(self.iron, self.cable, self.receipt, self.max_iron, self.max_cable)
+        self.tech_work()
+        if not self.can_work():
+            return
         super().update()
+        if self.receipt == 'IronStick':
+            self.update_IronStick()
+        elif self.receipt == 'IronGeer':
+            self.update_IronGeer()
+        elif self.receipt == 'CopperCable':
+            self.update_CopperCable()
+        elif self.receipt == 'LabPocket1Part1':
+            self.update_LabPocket1Part1()
+        elif self.receipt == 'Chip':
+            self.update_Chip()
+
+    def tech_work(self):
+        self.get_item()
+        self.set_max_receipt()
+        self.delete_trash()
+        self.can_entry()
+        if self.receipt == 'Chip':
+            self.can_pull_cable = False
+            self.can_delete_cable = True
+        else:
+            self.can_pull_cable = True
+            self.can_delete_cable = False
+
+        if self.receipt == 'LabPocket1Part1':
+            self.can_pull_geer_or_stick = False
+            self.can_delete_geer_or_stick = True
+        else:
+            self.can_pull_geer_or_stick = True
+            self.can_delete_geer_or_stick = False
+
+    def get_item(self):
         self.find_item()
+        if self.item is None:
+            return
+        elif isinstance(self.item, IronPlate):
+            self.iron += 1
+        elif isinstance(self.item, CopperPlate):
+            self.copper += 1
+        elif isinstance(self.item, IronStick) and self.can_delete_geer_or_stick:
+            self.stick += 1
+        elif isinstance(self.item, IronGeer) and self.can_delete_geer_or_stick:
+            self.geer += 1
+        elif isinstance(self.item, CopperCable) and self.can_delete_cable:
+            self.cable += 1
+        else:
+            return
+        self.item.kill()
+        self.item = None
+
+    def update_IronStick(self):
+        self.iron -= 1
+        IronStick(self.game, self.rect.x // 40, self.rect.y // 40)
+        IronStick(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def can_work_IronStick(self):
+        if self.iron < 1:
+            return False
+        return True
+
+    def can_entry(self):
+        if self.iron >= self.max_iron:
+            self.entry_iron = False
+        else:
+            self.entry_iron = True
+
+        if self.copper >= self.max_copper:
+            self.entry_copper = False
+        else:
+            self.entry_copper = True
+
+        if self.geer >= self.max_geer:
+            self.entry_geer = False
+        else:
+            self.entry_geer = True
+
+        if self.stick >= self.max_stick:
+            self.entry_stick = False
+        else:
+            self.entry_stick = True
+
+        if self.cable >= self.max_cable:
+            self.entry_cable = False
+        else:
+            self.entry_cable = True
+
+    def update_IronGeer(self):
+        self.iron -= 2
+        IronGeer(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def can_work_IronGeer(self):
+        if self.iron < 2:
+            return False
+        return True
+
+    def update_CopperCable(self):
+        self.copper -= 1
+        CopperCable(self.game, self.rect.x // 40, self.rect.y // 40)
+        CopperCable(self.game, self.rect.x // 40, self.rect.y // 40)
+        CopperCable(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def can_work_CopperCable(self):
+        if self.copper < 1:
+            return False
+        return True
+
+    def update_LabPocket1Part1(self):
+        self.geer -= 2
+        self.stick -= 4
+        LabPocket1Part1(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def update_Chip(self):
+        self.iron -= 1
+        self.cable -= 2
+        Chip(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def can_work_LabPocket1Part1(self):
+        if self.geer < 2:
+            return False
+        if self.stick < 4:
+            return False
+        return True
+
+    def can_work_Chip(self):
+        if self.iron < 1:
+            return False
+        if self.cable < 2:
+            return False
+        return True
+
+    def set_max(self, iron=0, copper=0, stick=0, geer=0, cable=0):
+        self.max_iron = iron
+        self.max_copper = copper
+        self.max_geer = geer
+        self.max_stick = stick
+        self.max_cable = cable
+
+    def set_max_receipt(self):
+        if self.receipt == 'IronStick':
+            self.set_max(1)
+        elif self.receipt == 'IronGeer':
+            self.set_max(2)
+        elif self.receipt == 'CopperCable':
+            self.set_max(0, 1)
+        elif self.receipt == 'LabPocket1Part1':
+            self.set_max(0, 0, 4, 2)
+        elif self.receipt == 'Chip':
+            self.set_max(1, 0, 0, 0, 2)
+
+    def delete_trash(self):
+        while self.iron > self.max_iron:
+            self.iron -= 1
+        while self.copper > self.max_copper:
+            self.copper -= 1
+        while self.stick > self.max_stick and self.can_delete_geer_or_stick:
+            self.stick -= 1
+        while self.geer > self.max_geer and self.can_delete_geer_or_stick:
+            self.geer -= 1
+        while self.cable > self.max_cable and self.can_delete_cable:
+            self.cable -= 1
+
+    def can_work_receipt(self):
+        if self.receipt == 'IronStick':
+            if not self.can_work_IronStick():
+                return False
+        elif self.receipt == 'IronGeer':
+            if not self.can_work_IronGeer():
+                return False
+        elif self.receipt == 'CopperCable':
+            if not self.can_work_CopperCable():
+                return False
+        elif self.receipt == 'LabPocket1Part1':
+            if not self.can_work_LabPocket1Part1():
+                return False
+        elif self.receipt == 'Chip':
+            if not self.can_work_Chip():
+                return False
+        return True
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        if self.game.electricity < ELECTRICITY:
+            return False
+        if not self.can_work_receipt():
+            return False
+        return True
 
 
 class Level2AssemblyMachine(AssemblyMachine):
@@ -566,6 +800,11 @@ class Player(pygame.sprite.Sprite):
         # self.last2 = 0
 
     def update(self):
+        if self.game.gamemode == 'creative':
+            self.image.fill('black')
+        elif self.game.gamemode == 'survive':
+            image_to_load = pygame.image.load('img/Безымянный.png')
+            self.image.blit(image_to_load, (0, 0))
         keys = pygame.key.get_pressed()
         if pygame.time.get_ticks() - self.last >= 75:
             self.last = pygame.time.get_ticks()
@@ -612,7 +851,7 @@ class Mouse(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 6
-        self.groups = self.game.all, self.game.mouse
+        self.groups = self.game.all
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.width = self.height = 8
@@ -654,7 +893,7 @@ class Ground(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
         self._layer = 1
-        self.groups = self.game.all, self.game.dynamic
+        self.groups = self.game.all
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([1024, 1024])
@@ -744,7 +983,7 @@ class ItemCopperOre(Item):
 
 class IronStick(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железная Прут', 100)
+        super().__init__(game, x, y, 'Железный прут', 100)
 
 
 class IronPlate(Item):
@@ -775,3 +1014,18 @@ class ItemCoal(Item):
 class Steel(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Сталь', 2)
+
+
+class CopperCable(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Медный кабель', 2)
+
+
+class LabPocket1Part1(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'LabPacket1Part1', 2)
+
+
+class Chip(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Микросхема', 2)
