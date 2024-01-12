@@ -137,7 +137,11 @@ class Game:
     def change_receipt(self):
         assemblers = pygame.sprite.spritecollide(self.mouse, self.assemblers, False)
         if len(assemblers) == 0:
+            for i in range(100):
+                print('er.....')
             return
+        for i in range(100):
+            print('errrrrr.....')
         assembler = assemblers[0]
         assembler.change_receipt()
 
@@ -189,10 +193,11 @@ class Game:
             for j in range(2, 5):
                 Ground(self, j, i)
 
-        for kol in range(31):
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), IronOre)
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), CopperOre)
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), Coal)
+        for kol in range(63):
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), IronOre)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), CopperOre)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), Coal)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), Gold)
         for ore1 in self.ores:
             for ore2 in self.ores:
                 if ore1 != ore2 and ore1.rect == ore2.rect:

@@ -52,7 +52,8 @@ class BuildObject(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, name, time):
         self.game = game
         self._layer = 2
-        if name == 'Level1_Assembling_machine':
+        if name == 'Level1_Assembling_machine' or name == 'Lab_Assembling_machine' or \
+                name == 'Level2_Assembling_machine':
             self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds, self.game.assemblers
         else:
             self.groups = self.game.all, self.game.dynamic, self.game.storage, self.game.builds
@@ -134,6 +135,8 @@ class Mine(BuildObject):
                 self.ore = ItemCopperOre
             elif isinstance(hits[0], Coal):
                 self.ore = ItemCoal
+            elif isinstance(hits[0], Gold):
+                self.ore = ItemGold
 
     def update(self):
         if not self.can_work():
@@ -205,6 +208,12 @@ class Conveyor(BuildObject):
             if isinstance(self.find_object(), Level1AssemblyMachine):
                 if not self.can_move_to_assembler1():
                     return False
+            if isinstance(self.find_object(), Level2AssemblyMachine):
+                if not self.can_move_to_assembler2():
+                    return False
+            if isinstance(self.find_object(), LabAssemblyMachine):
+                if not self.can_move_to_lab_assembler():
+                    return False
         return True
 
     def can_move_to_foundry(self):
@@ -224,6 +233,30 @@ class Conveyor(BuildObject):
         if not self.find_object().entry_stick and isinstance(self.item, IronStick):
             return False
         if not self.find_object().entry_cable and isinstance(self.item, CopperCable):
+            return False
+        return True
+
+    def can_move_to_assembler2(self):
+        if not self.find_object().entry_steel and isinstance(self.item, Steel):
+            return False
+        if not self.find_object().entry_chip and isinstance(self.item, Chip):
+            return False
+        if not self.find_object().entry_frame and isinstance(self.item, SteelFrame):
+            return False
+        if not self.find_object().entry_lpp and isinstance(self.item, LabPocket1Part1):
+            return False
+        if not self.find_object().entry_gold and isinstance(self.item, ItemGold):
+            return False
+        return True
+
+    def can_move_to_lab_assembler(self):
+        if not self.find_object().entry_lp1p1 and isinstance(self.item, LabPocket1Part1):
+            return False
+        if not self.find_object().entry_lp1p2 and isinstance(self.item, Chip):
+            return False
+        if not self.find_object().entry_lp2p1 and isinstance(self.item, Engine):
+            return False
+        if not self.find_object().entry_lp2p2 and isinstance(self.item, PowerChip):
             return False
         return True
 
@@ -275,10 +308,18 @@ class PullConveyor(Conveyor):
         elif isinstance(previous_object, Level1AssemblyMachine):
             if isinstance(previous_item, LabPocket1Part1) or isinstance(previous_item, Chip):
                 self.pull_move(previous_item)
-            if isinstance(previous_item, CopperCable) and previous_object.can_pull_cable:
+            elif isinstance(previous_item, CopperCable) and previous_object.can_pull_cable:
                 self.pull_move(previous_item)
-            if (isinstance(previous_item, IronGeer) or isinstance(previous_item, IronStick)) and \
+            elif(isinstance(previous_item, IronGeer) or isinstance(previous_item, IronStick)) and \
                 previous_object.can_pull_geer_or_stick:
+                self.pull_move(previous_item)
+        elif isinstance(previous_object, Level2AssemblyMachine):
+            if isinstance(previous_item, PowerChip) or isinstance(previous_item, Engine):
+                self.pull_move(previous_item)
+            elif isinstance(previous_item, SteelFrame) and previous_object.can_pull_frame:
+                self.pull_move(previous_item)
+        elif isinstance(previous_object, LabAssemblyMachine):
+            if isinstance(previous_item, LabPacket1) or isinstance(previous_item, LabPacket2):
                 self.pull_move(previous_item)
         elif isinstance(previous_object, Conveyor):
             self.pull_move(previous_item)
@@ -417,8 +458,6 @@ class Level1AssemblyMachine(AssemblyMachine):
         self.entry_cable = False
 
     def update(self):
-        if self.receipt == 'Chip':
-            print(self.iron, self.cable, self.receipt, self.max_iron, self.max_cable)
         self.tech_work()
         if not self.can_work():
             return
@@ -615,19 +654,317 @@ class Level1AssemblyMachine(AssemblyMachine):
 class Level2AssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, 'Level2_Assembling_machine', ASSEMBLY_MACHINE_TIME)
+        self.receipt = 'SteelFrame'
+        self.receipts = ['PowerChip', 'Engine', 'SteelFrame']
+
+        self.steel = 0
+        self.chip = 0
+        self.frame = 0
+        self.lpp = 0
+        self.gold = 0
+        self.max_steel = 0
+        self.max_chip = 0
+        self.max_frame = 0
+        self.max_lpp = 0
+        self.max_gold = 0
+        self.entry_steel = False
+        self.entry_chip = False
+        self.entry_frame = False
+        self.entry_lpp = False
+        self.entry_gold = False
+
+        self.can_pull_frame = True
+        self.can_delete_frame = False
+
+    def tech_work(self):
+        print(self.steel, self.max_steel, self.entry_steel, self.receipt)
+        self.get_item()
+        self.set_max_receipt()
+        self.delete_trash()
+        self.can_entry()
+        if self.receipt == 'SteelFrame':
+            self.can_pull_frame = True
+            self.can_delete_frame = False
+        else:
+            self.can_pull_frame = False
+            self.can_delete_frame = True
+
+    def get_item(self):
+        self.find_item()
+        if self.item is None:
+            return
+        elif isinstance(self.item, Steel):
+            self.steel += 1
+        elif isinstance(self.item, Chip):
+            self.chip += 1
+        elif isinstance(self.item, SteelFrame) and self.can_delete_frame:
+            self.frame += 1
+        elif isinstance(self.item, LabPocket1Part1):
+            self.lpp += 1
+        elif isinstance(self.item, ItemGold):
+            self.gold += 1
+        else:
+            return
+        self.item.kill()
+        self.item = None
+
+    def can_entry(self):
+        if self.steel >= self.max_steel:
+            self.entry_steel = False
+        else:
+            self.entry_steel = True
+
+        if self.chip >= self.max_chip:
+            self.entry_chip = False
+        else:
+            self.entry_chip = True
+
+        if self.frame >= self.max_frame:
+            self.entry_frame = False
+        else:
+            self.entry_frame = True
+
+        if self.lpp >= self.max_lpp:
+            self.entry_lpp = False
+        else:
+            self.entry_lpp = True
+
+        if self.gold >= self.max_gold:
+            self.entry_gold = False
+        else:
+            self.entry_gold = True
+
+    def set_max(self, steel=0, chip=0, frame=0, lpp=0, gold=0):
+        self.max_steel = steel
+        self.max_chip = chip
+        self.max_frame = frame
+        self.max_lpp = lpp
+        self.max_gold = gold
+
+    def set_max_receipt(self):
+        if self.receipt == 'SteelFrame':
+            self.set_max(3)
+        elif self.receipt == 'Engine':
+            self.set_max(0, 0, 1, 1)
+        elif self.receipt == 'PowerChip':
+            self.set_max(0, 2, 0, 0, 3)
+
+    def delete_trash(self):
+        while self.steel > self.max_steel:
+            self.steel -= 1
+        while self.chip > self.max_chip:
+            self.chip -= 1
+        while self.frame > self.max_frame and self.can_delete_frame:
+            self.frame -= 1
+        while self.lpp > self.max_lpp:
+            self.lpp -= 1
+        while self.gold > self.max_gold:
+            self.gold -= 1
 
     def update(self):
+        self.tech_work()
+        if not self.can_work():
+            return
         super().update()
-        self.find_item()
+        if self.receipt == 'SteelFrame':
+            self.create_SteelFrame()
+        elif self.receipt == 'PowerChip':
+            self.create_PowerChip()
+        elif self.receipt == 'Engine':
+            self.create_Engine()
+
+    def create_SteelFrame(self):
+        self.steel -= 3
+        SteelFrame(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def create_PowerChip(self):
+        self.chip -= 2
+        self.gold -= 3
+        PowerChip(self.game, self.rect.x // 40, self.rect.y // 40)
+        PowerChip(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def create_Engine(self):
+        self.frame -= 1
+        self.lpp -= 1
+        Engine(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def can_work_SteelFrame(self):
+        if self.steel < 3:
+            return False
+        return True
+
+    def can_work_PowerChip(self):
+        if self.chip < 2:
+            return False
+        if self.gold < 3:
+            return False
+        return True
+
+    def can_work_Engine(self):
+        if self.steel < 1:
+            return False
+        if self.lpp < 1:
+            return False
+        return True
+
+    def can_work_receipt(self):
+        if self.receipt == 'SteelFrame':
+            if not self.can_work_SteelFrame():
+                return False
+        elif self.receipt == 'PowerChip':
+            if not self.can_work_PowerChip():
+                return False
+        elif self.receipt == 'Engine':
+            if not self.can_work_Engine():
+                return False
+        return True
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        if self.game.electricity < ELECTRICITY:
+            return False
+        if not self.can_work_receipt():
+            return False
+        return True
 
 
 class LabAssemblyMachine(AssemblyMachine):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, 'Lab_Assembling_machine', ASSEMBLY_MACHINE_TIME)
 
+        self.lp1p1 = 0
+        self.lp1p2 = 0
+        self.lp2p1 = 0
+        self.lp2p2 = 0
+        self.max_lp1p1 = 0
+        self.max_lp1p2 = 0
+        self.max_lp2p1 = 0
+        self.max_lp2p2 = 0
+        self.entry_lp1p1 = 0
+        self.entry_lp1p2 = 0
+        self.entry_lp2p1 = 0
+        self.entry_lp2p2 = 0
+
     def update(self):
+        self.tech_work()
+        if not self.can_work():
+            return
         super().update()
+        if self.receipt == 'LabPacket1':
+            self.update_LabPacket1()
+        elif self.receipt == 'labPacket2':
+            self.update_LabPacket2()
+
+    def tech_work(self):
+        self.get_item()
+        self.set_max_receipt()
+        self.delete_trash()
+        self.can_entry()
+
+    def get_item(self):
         self.find_item()
+        if self.item is None:
+            return
+        elif isinstance(self.item, Chip):
+            self.lp1p2 += 1
+        elif isinstance(self.item, LabPocket1Part1):
+            self.lp1p1 += 1
+        elif isinstance(self.item, Engine):
+            self.lp2p1 += 1
+        elif isinstance(self.item, PowerChip):
+            self.lp2p2 += 1
+        else:
+            return
+        self.item.kill()
+        self.item = None
+
+    def can_entry(self):
+        if self.lp1p1 >= self.max_lp1p1:
+            self.entry_lp1p1 = False
+        else:
+            self.entry_lp1p1 = True
+
+        if self.lp1p2 >= self.max_lp1p2:
+            self.entry_lp1p2 = False
+        else:
+            self.entry_lp1p2 = True
+
+        if self.lp2p1 >= self.max_lp2p1:
+            self.entry_lp2p1 = False
+        else:
+            self.entry_lp2p1 = True
+
+        if self.lp2p2 >= self.max_lp2p2:
+            self.entry_lp2p2 = False
+        else:
+            self.entry_lp2p2 = True
+
+    def delete_trash(self):
+        while self.lp1p1 > self.max_lp1p1:
+            self.lp1p1 -= 1
+        while self.lp1p1 > self.max_lp1p1:
+            self.lp1p1 -= 1
+        while self.lp2p1 > self.max_lp2p1:
+            self.lp2p1 -= 1
+        while self.lp2p2 > self.max_lp2p2:
+            self.lp2p2 -= 1
+
+    def set_max(self, lp1p1=0, lp1p2=0, lp2p1=0, lp2p2=0):
+        self.max_lp1p1 = lp1p1
+        self.max_lp1p2 = lp1p2
+        self.max_lp2p1 = lp2p1
+        self.max_lp2p2 = lp2p2
+
+    def set_max_receipt(self):
+        if self.receipt == 'LabPacket1':
+            self.set_max(1, 1)
+        elif self.receipt == 'LabPacket2':
+            self.set_max(0, 0, 1, 1)
+
+    def can_work(self):
+        if pygame.time.get_ticks() - self.last < self.time:
+            return False
+        self.last = pygame.time.get_ticks()
+        if self.game.electricity < ELECTRICITY:
+            return False
+        if not self.can_work_receipt():
+            return False
+        return True
+
+    def can_work_receipt(self):
+        if self.receipt == 'LabPacket1':
+            if not self.can_work_LabPacket1():
+                return False
+        elif self.receipt == 'LabPacket2':
+            if not self.can_work_LabPacket2():
+                return False
+        return True
+
+    def can_work_LabPacket1(self):
+        if self.lp1p1 < 1:
+            return False
+        if self.lp1p2 < 1:
+            return False
+        return True
+
+    def can_work_LabPacket2(self):
+        if self.lp2p1 < 1:
+            return False
+        if self.lp2p2 < 1:
+            return False
+        return True
+
+    def update_LabPacket1(self):
+        self.lp1p1 -= 1
+        self.lp1p2 -= 1
+        LabPacket1(self.game, self.rect.x // 40, self.rect.y // 40)
+
+    def update_LabPacket2(self):
+        self.lp2p1 -= 1
+        self.lp2p2 -= 1
+        LabPacket2(self.game, self.rect.x // 40, self.rect.y // 40)
 
 
 class Furnaсe(BuildObject):
@@ -697,7 +1034,6 @@ class Foundry(BuildObject):
 
     def update(self):
         self.trash()
-        self.game.info2 = ' ' + str(self.iron) + ' ' + str(self.coal)
         if not self.can_work():
             return
         super().update()
@@ -936,6 +1272,11 @@ class Coal(Ore):
         super().__init__(game, x, y, 'Уголь')
 
 
+class Gold(Ore):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Золото')
+
+
 class Item(pygame.sprite.Sprite):
     def __init__(self, game, x, y, image, exp, layer=4):
         self.game = game
@@ -973,22 +1314,22 @@ class Item(pygame.sprite.Sprite):
 
 class ItemIronOre(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Предмет железная руда', 1)
+        super().__init__(game, x, y, 'Предмет железная руда', 0)
 
 
 class ItemCopperOre(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Предмет медная руда', 1)
+        super().__init__(game, x, y, 'Предмет медная руда', 0)
 
 
 class IronStick(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железный прут', 100)
+        super().__init__(game, x, y, 'Железный прут', 0)
 
 
 class IronPlate(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железная пластина', 10)
+        super().__init__(game, x, y, 'Железная пластина', 0)
 
 
 class TechItem(Item):
@@ -998,34 +1339,64 @@ class TechItem(Item):
 
 class CopperPlate(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Медная пластина', 10)
+        super().__init__(game, x, y, 'Медная пластина', 0)
 
 
 class IronGeer(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Железная шестерня', 400)
+        super().__init__(game, x, y, 'Железная шестерня', 0)
 
 
 class ItemCoal(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Предмет уголь', 2)
+        super().__init__(game, x, y, 'Предмет уголь', 0)
 
 
 class Steel(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Сталь', 2)
+        super().__init__(game, x, y, 'Сталь', 0)
 
 
 class CopperCable(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Медный кабель', 2)
+        super().__init__(game, x, y, 'Медный кабель', 0)
 
 
 class LabPocket1Part1(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'LabPacket1Part1', 2)
+        super().__init__(game, x, y, 'LabPacket1Part1', 0)
 
 
 class Chip(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'Микросхема', 2)
+        super().__init__(game, x, y, 'Микросхема', 0)
+
+
+class LabPacket1(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'LabPacket1', 100)
+
+
+class LabPacket2(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'LabPacket2', 1000)
+
+
+class SteelFrame(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Стальной каркас', 0)
+
+
+class Engine(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Двигатель', 0)
+
+
+class PowerChip(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Мощная электросхема', 0)
+
+class ItemGold(Item):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y, 'Предмет золото', 0)
+
