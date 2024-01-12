@@ -137,11 +137,7 @@ class Game:
     def change_receipt(self):
         assemblers = pygame.sprite.spritecollide(self.mouse, self.assemblers, False)
         if len(assemblers) == 0:
-            for i in range(100):
-                print('er.....')
             return
-        for i in range(100):
-            print('errrrrr.....')
         assembler = assemblers[0]
         assembler.change_receipt()
 

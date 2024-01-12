@@ -425,7 +425,6 @@ class AssemblyMachine(BuildObject):
         else:
             next = 0
         self.receipt = self.receipts[next]
-        print('рецепт успешно изменен')
 
 
 class Level1AssemblyMachine(AssemblyMachine):
@@ -677,7 +676,6 @@ class Level2AssemblyMachine(AssemblyMachine):
         self.can_delete_frame = False
 
     def tech_work(self):
-        print(self.steel, self.max_steel, self.entry_steel, self.receipt)
         self.get_item()
         self.set_max_receipt()
         self.delete_trash()
@@ -1086,7 +1084,6 @@ class Foundry(BuildObject):
             IronPlate(self.game, self.rect.x // 40, self.rect.y // 40)
         for i in range(self.coal):
             ItemCoal(self.game, self.rect.x // 40, self.rect.y // 40)
-        print('я не готов умирать')
 
 
 class TrashBox(BuildObject):
