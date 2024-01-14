@@ -14,7 +14,7 @@ class Info(Interface):
     def __init__(self, game):
         super().__init__(game)
 
-        self.image = pygame.Surface([SIDE * 23, SIDE])
+        self.image = pygame.Surface([SIDE * 20, SIDE * 4])
         self.image.fill((200, 200, 200))
 
         self.rect = self.image.get_rect()
@@ -28,9 +28,23 @@ class Info(Interface):
             self.last = pygame.time.get_ticks()
             self.image.fill((200, 200, 200))
         f1 = pygame.font.Font(None, 60)
-        text1 = f1.render(self.game.info, True,
+        text1 = f1.render('object: ' + str(self.game.info_build_object), True,
                           (0, 0, 0))
-        self.image.blit(text1, self.rect)
+        text2 = f1.render('exp: ' + str(self.game.exp), True,
+                          (0, 0, 0))
+        text3 = f1.render('electricity: ' + str(self.game.electricity), True,
+                          (0, 0, 0))
+        text4 = f1.render('Вы не можете строить литейную', True,
+                          (0, 0, 0))
+        text5 = f1.render('Вы можете строить литейную', True,
+                          (0, 0, 0))
+        self.image.blit(text1, (0, 0, SIDE * 16, SIDE))
+        self.image.blit(text2, (0, SIDE, SIDE * 16, SIDE))
+        self.image.blit(text3, (0, SIDE * 2, SIDE * 16, SIDE))
+        if self.game.can_use_foundry:
+            self.image.blit(text5, (0, SIDE * 3, SIDE * 20, SIDE))
+        else:
+            self.image.blit(text4, (0, SIDE * 3, SIDE * 20, SIDE))
 
 
 class Facing(Interface):
@@ -1205,6 +1219,8 @@ class Mouse(pygame.sprite.Sprite):
                 self.kill_item()
 
     def build(self):
+        if self.game.build_object == Foundry and not self.game.can_use_foundry:
+            return
         object = self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
         pygame.sprite.spritecollide(object, self.game.builds, True)
         object = self.game.build_object(self.game, self.rect.x // 40, self.rect.y // 40, self.game.facing)
@@ -1371,12 +1387,12 @@ class Chip(Item):
 
 class LabPacket1(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'LabPacket1', 100)
+        super().__init__(game, x, y, 'LabPacket1', 1)
 
 
 class LabPacket2(Item):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, 'LabPacket2', 1000)
+        super().__init__(game, x, y, 'LabPacket2', 10)
 
 
 class SteelFrame(Item):
@@ -1392,6 +1408,7 @@ class Engine(Item):
 class PowerChip(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Мощная электросхема', 0)
+
 
 class ItemGold(Item):
     def __init__(self, game, x, y):

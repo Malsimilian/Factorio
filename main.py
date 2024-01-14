@@ -37,6 +37,7 @@ class Game:
         self.left_click = False
 
         self.gamemode = 'creative'
+        self.can_use_foundry = False
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
@@ -110,6 +111,8 @@ class Game:
             self.rotate_anticlockwise()
         if event.key == pygame.K_r:
             self.change_build_object()
+        if event.key == pygame.K_o:
+            self.exp += 100
 
     def rotate_clockwise(self):
         self.facing_id += 1
@@ -148,8 +151,7 @@ class Game:
             self.events()
             self.draw()
             self.update()
-            self.check_win()
-            self.update_info()
+            self.check_exp()
             self.react_mouse_click()
 
         self.runnig = False
@@ -164,23 +166,20 @@ class Game:
             self.left_click = True
         self.click = True
 
-    def check_win(self):
-        if self.exp >= WIN:
-            self.is_win = True
-        else:
-            self.is_win = False
+    def check_exp(self):
+        if not self.can_use_foundry:
+            if self.exp >= WIN:
+                self.can_use_foundry = True
+                self.exp = 0
+                self.electricity = 0
+                self.create_map()
 
     def intro_screen(self):
         Button(self, 500, 500, self.create_map)
         Mouse(self)
 
-    def update_info(self):
-        if self.is_win:
-            self.info = self.info_build_object + f' {self.exp} ' + str(self.electricity) + ' WIN' + self.info2
-        else:
-            self.info = self.info_build_object + f' {self.exp} ' + str(self.electricity) + self.info2
-
     def create_map(self):
+        self.screen.fill('black')
         for sprite in self.all:
             sprite.kill()
 
