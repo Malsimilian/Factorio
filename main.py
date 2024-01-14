@@ -1,10 +1,8 @@
 import sys
 import random
-
-import pygame
-
 from sprite import *
 from config import *
+
 
 class Game:
     def __init__(self):
@@ -144,8 +142,6 @@ class Game:
         assembler = assemblers[0]
         assembler.change_receipt()
 
-
-
     def main(self): #игровой цикл
         while self.runnig:
             self.events()
@@ -221,3 +217,4 @@ while g.runnig:
     g.main()
 pygame.quit()
 sys.exit()
+

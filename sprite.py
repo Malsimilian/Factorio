@@ -1014,6 +1014,7 @@ class Furnaсe(BuildObject):
 class SolarPanel(BuildObject):
     def __init__(self, game, x, y, facing):
         super().__init__(game, x, y, None, 'Солнечная панель', SOLAR_PANEL_TIME)
+        self.game.electricity -= 50
 
     def update(self):
         if not self.can_work():
@@ -1136,7 +1137,7 @@ class Player(pygame.sprite.Sprite):
         self.width = self.height = SIDE
         self.image = pygame.Surface([SIDE, SIDE])
 
-        image_to_load = pygame.image.load('img/Безымянный.png')
+        image_to_load = pygame.image.load('img/Игрок.png')
         self.image = pygame.Surface([self.width, self.height])
         self.image.set_colorkey(BLACK)
         self.image.blit(image_to_load, (0, 0))
@@ -1144,13 +1145,12 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (WIN_WIDTH // 2 + 20, WIN_HEIGHT // 2 + 20)
         self.last = 0
-        # self.last2 = 0
 
     def update(self):
         if self.game.gamemode == 'creative':
             self.image.fill('black')
         elif self.game.gamemode == 'survive':
-            image_to_load = pygame.image.load('img/Безымянный.png')
+            image_to_load = pygame.image.load('img/Игрок.png')
             self.image.blit(image_to_load, (0, 0))
         keys = pygame.key.get_pressed()
         if pygame.time.get_ticks() - self.last >= 75:
