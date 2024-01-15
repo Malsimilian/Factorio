@@ -1053,15 +1053,15 @@ class Foundry(BuildObject):
         self.alloy()
 
     def trash(self):
-        if self.iron >= 4 and self.coal >= 4:
+        if self.iron >= 1 and self.coal >= 1:
             self.entry_allowed = False
         else:
             self.entry_allowed = True
-        if self.iron >= 4:
+        if self.iron >= 1:
             self.iron_entry_allowed = False
         else:
             self.iron_entry_allowed = True
-        if self.coal >= 4:
+        if self.coal >= 1:
             self.coal_entry_allowed = False
         else:
             self.coal_entry_allowed = True
