@@ -5,7 +5,7 @@ from config import *
 class Interface(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
-        self._layer = 3
+        self._layer = 5
         self.groups = game.all, game.interface
         super().__init__(self.groups)
 
