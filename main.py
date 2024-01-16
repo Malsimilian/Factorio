@@ -110,7 +110,7 @@ class Game:
         if event.key == pygame.K_r:
             self.change_build_object()
         if event.key == pygame.K_o:
-            self.exp += 100
+            self.exp += 1000
 
     def rotate_clockwise(self):
         self.facing_id += 1

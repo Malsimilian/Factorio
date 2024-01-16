@@ -1087,6 +1087,8 @@ class Foundry(BuildObject):
         elif isinstance(self.item, ItemCoal):
             self.coal += 1
             self.item.kill()
+        elif not isinstance(self.item, Steel):
+            self.item.kill()
         self.item = None
 
     def alloy(self):
