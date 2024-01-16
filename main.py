@@ -3,6 +3,7 @@ import random
 from sprite import *
 from config import *
 
+
 class Game:
     def __init__(self):
         #иниацилизация
@@ -30,25 +31,23 @@ class Game:
                                    'TrashBox', 'Level1AssemblyMachine', 'Level2AssemblyMachine', 'LabAssemblyMachine')
         self.last_wheel = 200
 
-        self.receipt = IronStick
-        self.receipts = [IronStick, IronGeer]
-        self.info_receipt = 'IronStick'
-        self.info_receipts = ['IronStick', 'IronGeer']
-        self.last_wheel_receipt = 200
-
         self.right_click = False
         self.left_click = False
+
+        self.gamemode = 'creative'
+        self.can_use_foundry = True
 
         self.all = pygame.sprite.LayeredUpdates()  # абсолютно все  !!! добавлять все спрайты !!!
         self.dynamic = pygame.sprite.LayeredUpdates()  # движующиеся по экрану
         self.static = pygame.sprite.LayeredUpdates()  # не движующиеся по экрану
-        self.mouse = pygame.sprite.LayeredUpdates()  # для курсора
+        self.mouse = pygame.sprite.LayeredUpdates()
         self.storage = pygame.sprite.LayeredUpdates()  # для всех классов со внутринем хранилищем
         self.ores = pygame.sprite.LayeredUpdates()
         self.builds = pygame.sprite.LayeredUpdates()  # для всех построек
         self.interface = pygame.sprite.LayeredUpdates()  # для всего интерфейса
         self.items = pygame.sprite.LayeredUpdates()  # для всех предметов
         self.player = pygame.sprite.LayeredUpdates()
+        self.assemblers = pygame.sprite.LayeredUpdates()
 
     def update(self):
         self.all.update()
@@ -63,7 +62,9 @@ class Game:
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.runnig = False
+                for sprite in self.all:
+                    sprite.kill()
+                Game_Over_Screen(self)
             if event.type == pygame.KEYDOWN:
                 self.key_event_react(event)
 
@@ -111,6 +112,8 @@ class Game:
             self.rotate_anticlockwise()
         if event.key == pygame.K_r:
             self.change_build_object()
+        if event.key == pygame.K_o:
+            self.exp += 100
 
     def rotate_clockwise(self):
         self.facing_id += 1
@@ -136,23 +139,18 @@ class Game:
             self.info_build_object = self.info_build_objects[next]
 
     def change_receipt(self):
-        if pygame.time.get_ticks() - self.last_wheel_receipt >= 200:
-            self.last_wheel = pygame.time.get_ticks()
-            index = self.receipts.index(self.receipt)
-            if index != len(self.receipts) - 1:
-                next = index + 1
-            else:
-                next = 0
-            self.receipt = self.receipts[next]
-            self.info_receipt = self.info_receipts[next]
+        assemblers = pygame.sprite.spritecollide(self.mouse, self.assemblers, False)
+        if len(assemblers) == 0:
+            return
+        assembler = assemblers[0]
+        assembler.change_receipt()
 
     def main(self): #игровой цикл
         while self.runnig:
             self.events()
             self.draw()
             self.update()
-            self.check_win()
-            self.update_info()
+            self.check_exp()
             self.react_mouse_click()
 
         self.runnig = False
@@ -167,35 +165,32 @@ class Game:
             self.left_click = True
         self.click = True
 
-    def check_win(self):
-        if self.exp >= WIN:
-            self.is_win = True
-        else:
-            self.is_win = False
+    def check_exp(self):
+        if not self.can_use_foundry:
+            if self.exp >= WIN:
+                self.can_use_foundry = True
+                self.exp = 0
+                self.electricity = 0
+                self.create_map()
 
     def intro_screen(self):
-        Button(self, 500, 500, self.create_map)
         Mouse(self)
 
-    def update_info(self):
-        if self.is_win:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + ' WIN' + self.info2
-        else:
-            self.info = self.info_build_object + ' ' + self.info_receipt + f' {self.exp} ' + str(self.electricity) + self.info2
-
     def create_map(self):
+        self.screen.fill('black')
         for sprite in self.all:
             sprite.kill()
 
-        Mouse(self)
-        for i in range(5):
-            for j in range(5):
+        self.mouse = Mouse(self)
+        for i in range(2, 5):
+            for j in range(2, 5):
                 Ground(self, j, i)
 
-        for kol in range(31):
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), IronOre)
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), CopperOre)
-            self.create_field1(random.randint(0, 127), random.randint(0, 127), Coal)
+        for kol in range(63):
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), IronOre)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), CopperOre)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), Coal)
+            self.create_field1(random.randint(-127, 127), random.randint(-127, 127), Gold)
         for ore1 in self.ores:
             for ore2 in self.ores:
                 if ore1 != ore2 and ore1.rect == ore2.rect:
@@ -224,3 +219,4 @@ while g.runnig:
     g.main()
 pygame.quit()
 sys.exit()
+
