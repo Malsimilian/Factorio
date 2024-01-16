@@ -398,18 +398,9 @@ class Lab(BuildObject):
         self.research()
 
     def research(self):
-        if isinstance(self.item, ItemIronOre):
-            self.item.kill()
-            self.game.exp += 1
-            self.item = None
-        elif isinstance(self.item, IronPlate):
-            self.item.kill()
-            self.game.exp += 10
-            self.item = None
-        elif isinstance(self.item, CopperPlate):
-            self.item.kill()
-            self.game.exp += 10
-            self.item = None
+        self.game.exp += self.item.exp
+        self.item.kill()
+        self.item = None
 
     def can_work(self):
         if pygame.time.get_ticks() - self.last < self.time:
@@ -858,6 +849,9 @@ class LabAssemblyMachine(AssemblyMachine):
         self.entry_lp1p2 = 0
         self.entry_lp2p1 = 0
         self.entry_lp2p2 = 0
+
+        self.receipt = 'LabPacket1'
+        self.receipts = ['LabPacket1', 'LabPacket2']
 
     def update(self):
         self.tech_work()
