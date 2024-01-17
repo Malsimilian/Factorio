@@ -338,6 +338,7 @@ class PullConveyor(Conveyor):
         elif isinstance(previous_object, Conveyor):
             self.pull_move(previous_item)
 
+
     def pull_move(self, previous_item):
         if self.facing == 'вправо':
             previous_item.move(SIDE, 0)
@@ -1410,3 +1411,43 @@ class ItemGold(Item):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, 'Предмет золото', 0)
 
+
+class Game_Over_Screen(pygame.sprite.Sprite):
+    def __init__(self, game):
+        self.game = game
+        self._layer = 2
+        self.groups = self.game.all
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.image = pygame.Surface([WIN_WIDTH, WIN_HEIGHT])
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+
+        font = pygame.font.Font(None, 50)
+        try:
+            text = font.render("Ваш счёт: " + str(self.game.exp), True, (100, 255, 100))
+        except:
+            text = font.render("Ваш счёт: Неизвестно", True, (100, 255, 100))
+        text_x = WIN_WIDTH // 2 - text.get_width() // 2
+        text_y = WIN_HEIGHT // 2 - text.get_height() // 2
+        text_w = text.get_width()
+        text_h = text.get_height()
+        self.image.blit(text, (text_x, text_y))
+
+        self.time = pygame.time.get_ticks() + 3000
+
+        sqlite_connection = sqlite3.connect('db.db')
+        cursor = sqlite_connection.cursor()
+
+        sqlite_insert_query = """INSERT INTO Score
+                              (score)
+                              VALUES
+                              (""" + str(self.game.exp) + """);"""
+
+        count = cursor.execute(sqlite_insert_query)
+        sqlite_connection.commit()
+        cursor.close()
+
+    def update(self):
+        if pygame.time.get_ticks() >= self.time:
+            self.game.runnig = False

@@ -3,7 +3,6 @@ import random
 from sprite import *
 from config import *
 
-
 class Game:
     def __init__(self):
         #иниацилизация
@@ -61,7 +60,9 @@ class Game:
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.runnig = False
+                for sprite in self.all:
+                    sprite.kill()
+                Game_Over_Screen(self)
             if event.type == pygame.KEYDOWN:
                 self.key_event_react(event)
 
@@ -110,7 +111,7 @@ class Game:
         if event.key == pygame.K_r:
             self.change_build_object()
         if event.key == pygame.K_o:
-            self.exp += 1000
+            self.exp += 100
 
     def rotate_clockwise(self):
         self.facing_id += 1
@@ -171,11 +172,9 @@ class Game:
                 self.create_map()
 
     def intro_screen(self):
-        Button(self, 500, 500, self.create_map)
         Mouse(self)
 
     def create_map(self):
-        self.screen.fill('black')
         for sprite in self.all:
             sprite.kill()
 
