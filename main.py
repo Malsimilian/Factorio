@@ -3,6 +3,7 @@ import random
 from sprite import *
 from config import *
 
+
 class Game:
     def __init__(self):
         #иниацилизация

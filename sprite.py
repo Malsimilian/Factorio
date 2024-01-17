@@ -1,5 +1,6 @@
 import pygame
 from config import *
+import sqlite3
 
 
 class Interface(pygame.sprite.Sprite):
@@ -1425,7 +1426,10 @@ class Game_Over_Screen(pygame.sprite.Sprite):
 
         font = pygame.font.Font(None, 50)
         try:
-            text = font.render("Ваш счёт: " + str(self.game.exp), True, (100, 255, 100))
+            if self.game.exp < 100:
+                text = font.render("Ваш невероятный счёт: " + str(self.game.exp), True, (100, 255, 100))
+            else:
+                text = font.render("Ваш очень маленький счёт: " + str(self.game.exp), True, (100, 255, 100))
         except:
             text = font.render("Ваш счёт: Неизвестно", True, (100, 255, 100))
         text_x = WIN_WIDTH // 2 - text.get_width() // 2
