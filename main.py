@@ -175,6 +175,7 @@ class Game:
 
     def intro_screen(self):
         Mouse(self)
+        Button(self, 600, 600, self.create_map)
 
     def create_map(self):
         for sprite in self.all:
