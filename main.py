@@ -47,6 +47,7 @@ class Game:
         self.items = pygame.sprite.LayeredUpdates()  # для всех предметов
         self.player = pygame.sprite.LayeredUpdates()
         self.assemblers = pygame.sprite.LayeredUpdates()
+        self.mouse = pygame.sprite.LayeredUpdates()
 
     def update(self):
         self.all.update()
