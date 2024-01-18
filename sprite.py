@@ -1196,7 +1196,7 @@ class Mouse(pygame.sprite.Sprite):
     def __init__(self, game):
         self.game = game
         self._layer = 6
-        self.groups = self.game.all
+        self.groups = self.game.all, self.game.mouse
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.width = self.height = 8
