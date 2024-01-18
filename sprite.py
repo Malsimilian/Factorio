@@ -1175,9 +1175,8 @@ class Button(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.image = pygame.Surface([192, 96])
-        image_to_load = pygame.image.load('img/Кнопка играть.png')
         self.image.set_colorkey(BLACK)
-        self.image.blit(image_to_load, (0, 0))
+        self.image.fill((255, 0, 0))
 
         self.rect = self.image.get_rect()
         self.rect.x = x
