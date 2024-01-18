@@ -213,8 +213,8 @@ class Game:
 
 
 g = Game()
-#g.intro_screen()
-g.create_map()
+g.intro_screen()
+
 while g.runnig:
     g.main()
 pygame.quit()
